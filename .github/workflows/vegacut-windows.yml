@@ -1,0 +1,39 @@
+name: VegaCut Windows x64
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/filmcraft/Cargo.toml', 'Cargo.toml', '.github/workflows/vegacut-windows.yml', 'packaging/windows/vegacut-portable.ps1']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.95.0
+      - uses: Swatinem/rust-cache@v2
+      - name: Test project persistence and edits
+        run: cargo test --locked -p filmcraft-engine -p filmcraft-edit -p filmcraft-format
+      - name: Build portable package
+        shell: pwsh
+        run: ./packaging/windows/vegacut-portable.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VegaCut-windows-x64
+          path: dist/release/vegacut-*
+          if-no-files-found: error
+      - name: Publish alpha release
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $Version = [regex]::Match((Get-Content apps/filmcraft/Cargo.toml -Raw), '(?m)^version = "([^"]+)"').Groups[1].Value
+          if (-not $Version) { throw 'Missing version' }
+          gh release create "v$Version" dist/release/vegacut-* --target $env:GITHUB_SHA --prerelease --title "VegaCut v$Version" --notes-file docs/VEGACUT_RELEASE.md
+          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed' }

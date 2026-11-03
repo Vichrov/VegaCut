@@ -1,4 +1,4 @@
-# FilmCraft — rules for agents and contributors
+# VegaCut — rules for agents and contributors
 
 These rules apply to every human and AI contributor. `CLAUDE.md` holds the working instructions; this
 file holds the rules that must never be broken. When the two disagree, this file wins.
@@ -166,6 +166,14 @@ as PhotoCraft does with `cargo xtask corpus`.
   `@username` anyway.
 - Never add, edit, guess or copy anyone else's entry or name (not from git config, commit authors or
   GitHub profiles). Never hand-edit `contributors.json`.
+
+## VegaCut fork release policy
+
+This independent fork targets Windows x64. `vegacut-windows.yml` and
+`packaging/windows/vegacut-portable.ps1` are its release path. Keep release-infrastructure
+changes separate from feature changes. Upstream ArtCraft release jobs are reference-only;
+do not trigger them for VegaCut. The upstream shared-workflow-only policy below applies
+only to those inherited workflows, not to VegaCut's independent release pipeline.
 
 ## CI workflows
 - Workflows in `.github/workflows/` call the shared workflows in [`storytold/craft-common-actions`](https://github.com/storytold/craft-common-actions) at `@main`, with their inputs and secrets. No other jobs: if no shared workflow does what's needed, it doesn't go here.
