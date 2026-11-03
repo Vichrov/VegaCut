@@ -24,6 +24,7 @@ impl FilmcraftApp {
     /// `new` retains the embedding/automation layout for upstream compatibility.
     pub fn new_vegacut(session: Session) -> Self {
         let mut app = Self::new(session);
+        app.session.shortcuts.use_vegacut_if_unconfigured();
         app.default_audio_track_h = 96.0;
         app.ui.timeline.audio_track_h = 96.0;
         app.ui.timeline.header_w = 260.0;

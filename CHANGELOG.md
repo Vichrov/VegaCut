@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Add the VegaCut keyboard/mouse profile: S split, G/U group/ungroup, F8 snapping, Q loop, Alt+arrows frame stepping and Up/Down timeline zoom.
+- Wheel zooms about the pointer, Ctrl+wheel scrolls tracks, Shift+wheel scrolls time. Ctrl-drag copies clips without ripple insertion; Ctrl-click toggles selection.
+- New installations start with VegaCut controls; existing saved profiles are preserved. Choose VegaCut in Edit > Keyboard Shortcuts when upgrading.
+- Mouse behavior survives profile save/export/import, undo/redo, Cancel and restart. Other profiles retain their previous gestures.
+- Add headless interaction regressions and complete the v0.1/v0.2 milestone audit.
+
 ## 0.2.0
 
 - Keep only English and Russian; remove other interface catalogs, language commands and settings choices. Old language preferences migrate to English.

@@ -456,3 +456,53 @@ fn shift_alt_click_toggles_only_the_clicked_linked_side() {
         assert_eq!(*d.app().session.project, *before, "selection does not edit the document");
     }
 }
+
+#[test]
+fn vegacut_keys_split_group_and_undo() {
+    let mut d = Driver::new();
+    d.exec("shortcuts.loadPreset", json!({"name": "VegaCut"}));
+    d.exec("file.newSequence", json!({"name": "VegaCut keys", "fps": 24}));
+    let rate = d.app().session.sequence_rate();
+    d.exec("timeline.place", json!({"item": 5, "time": 0, "duration": rate.tick_of(96).0}));
+    let original = d.app().session.active_sequence().unwrap().clone();
+    let clip = original.video_tracks[0].items[0].id;
+    d.exec("timeline.select", json!({"clips": [clip.0]}));
+    d.exec("playhead.set", json!({"time": rate.tick_of(48).0}));
+    d.focus("Timeline");
+    for platform in [Platform::Mac, Platform::Windows, Platform::Linux] {
+        assert!(d.app().session.shortcuts.conflicts(platform).is_empty());
+    }
+    d.key("S");
+    let split = d.app().session.active_sequence().unwrap().clone();
+    assert_eq!(split.video_tracks[0].items.len(), 2);
+    d.key("Cmd+Z");
+    assert_eq!(*d.app().session.active_sequence().unwrap(), original);
+    d.key("S");
+    let clips: Vec<_> = d.app().session.active_sequence().unwrap().video_tracks[0].items.iter().map(|i| i.id.0).collect();
+    d.exec("timeline.select", json!({"clips": clips}));
+    d.key("G");
+    let q = d.app().session.active_sequence().unwrap();
+    assert!(q.video_tracks[0].items[0].group.is_some());
+    assert_eq!(q.video_tracks[0].items[0].group, q.video_tracks[0].items[1].group);
+    d.key("U");
+    assert!(d.app().session.active_sequence().unwrap().video_tracks[0].items.iter().all(|i| i.group.is_none()));
+    let zoom = d.app().ui.timeline.target_pps;
+    d.key("Up");
+    assert!(d.app().ui.timeline.target_pps > zoom);
+    let snapping = d.app().session.state.snapping;
+    d.key("F8");
+    assert_ne!(d.app().session.state.snapping, snapping);
+    let looping = d.app().playback.looping;
+    d.key("Q");
+    assert_ne!(d.app().playback.looping, looping);
+    let project = d.app().session.project.clone();
+    let elements = d.ok("ui.elements", json!({"prefix": "project"}));
+    let field = elements.as_array().unwrap().iter().filter_map(|e| e["id"].as_str()).find(|id| id.ends_with(".search")).unwrap().to_string();
+    d.ok("ui.click", json!({"id": field}));
+    d.ok("ui.type", json!({"text": "s"}));
+    d.key("S");
+    d.key("G");
+    d.key("Q");
+    assert_eq!(*d.app().session.project, *project, "editing keys never modify the project while typing");
+    assert_ne!(d.app().playback.looping, looping, "typing Q does not toggle loop playback");
+}

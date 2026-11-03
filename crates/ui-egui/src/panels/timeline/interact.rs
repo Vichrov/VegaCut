@@ -250,6 +250,10 @@ fn scrub_playhead(app: &mut FilmcraftApp, seq: &Sequence, layout: &Layout, p: Po
 /// Wheel input over the Timeline, as in Premiere Pro on macOS (checked in 26.5.2): the wheel
 /// moves the tracks under the pointer, Cmd + wheel the Timeline sideways, Option + wheel
 /// zooms about the pointer.
+fn copy_modifier(app: &FilmcraftApp, mods: egui::Modifiers) -> bool {
+    if app.session.shortcuts.vegacut_mouse { mods.command || mods.ctrl } else { mods.alt }
+}
+
 fn wheel_scroll(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, layout: &Layout, seq: &Sequence) {
     let ctx = ui.ctx().clone();
     // ---- wheel, as in Premiere Pro on macOS (checked in 26.5.2):
@@ -262,14 +266,16 @@ fn wheel_scroll(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, layout: &
         && let Some(p) = ctx.pointer_hover_pos()
     {
         let w = wheel_input(&ctx);
-        if (w.pinch - 1.0).abs() > 1e-4 || (w.alt && w.delta.y != 0.0) {
+        let vegas = app.session.shortcuts.vegacut_mouse;
+        let wheel_zoom = if vegas { !w.command && !w.shift && w.delta.y.abs() >= w.delta.x.abs() } else { w.alt };
+        if (w.pinch - 1.0).abs() > 1e-4 || (wheel_zoom && w.delta.y != 0.0) {
             let f = if (w.pinch - 1.0).abs() > 1e-4 { w.pinch as f64 } else { (1.0_f64 + w.delta.y as f64 * 0.01).clamp(0.5, 2.0) };
             let anchor_t = layout.tick_at(p.x).seconds();
             let v = &mut app.ui.timeline;
             v.target_pps = (v.target_pps * f).clamp(min_pps(seq.duration().seconds(), app.last_timeline_width), 24_000.0);
             app.tl.zoom_anchor = Some((anchor_t, p.x));
         } else if w.delta != egui::Vec2::ZERO {
-            let wheel_sideways = (app.session.prefs.timeline.mouse_scrolling == "horizontal") != w.command;
+            let wheel_sideways = !vegas && ((app.session.prefs.timeline.mouse_scrolling == "horizontal") != w.command);
             let sideways = if w.delta.x.abs() > w.delta.y.abs() {
                 Some(w.delta.x)
             } else if wheel_sideways || w.shift {
@@ -476,7 +482,7 @@ fn start_drag(
                     offset: Tick::ZERO,
                     track_delta: 0,
                     new_track: None,
-                    copy: mods.alt,
+                    copy: copy_modifier(app, mods),
                 })
             } else {
                 None
@@ -516,7 +522,7 @@ fn start_drag(
         (_, Grab::Other(Hit::Clip { clip, track, .. })) => {
             // select (shift toggles; alt selects one side of a link)
             let sel = &app.session.state.selection;
-            if mods.shift {
+            if mods.shift || (app.session.shortcuts.vegacut_mouse && mods.command && resp.clicked()) {
                 let _ = app.session.execute("timeline.select", json!({"clips": [clip.0], "toggle": true, "linked": !mods.alt}));
             } else if !sel.contains(&clip) || (mods.alt && resp.clicked()) {
                 // Alt-click isolates one side; Alt-drag keeps the selected group to copy.
@@ -524,7 +530,15 @@ fn start_drag(
             }
             if resp.drag_started() {
                 let clips = app.session.state.selection.clone();
-                Some(Drag::Move { clips, grab_tick: t, start_track: track, offset: Tick::ZERO, track_delta: 0, new_track: None, copy: mods.alt })
+                Some(Drag::Move {
+                    clips,
+                    grab_tick: t,
+                    start_track: track,
+                    offset: Tick::ZERO,
+                    track_delta: 0,
+                    new_track: None,
+                    copy: copy_modifier(app, mods),
+                })
             } else {
                 None
             }
@@ -696,7 +710,7 @@ fn drag_update(app: &mut FilmcraftApp, ui: &mut egui::Ui, resp: &egui::Response,
                 };
                 if move_is_locked(seq, &clips, track_delta) {
                     ctx.set_cursor_icon(CursorIcon::NotAllowed);
-                    Some(Drag::Move { clips, grab_tick, start_track, offset: Tick::ZERO, track_delta: 0, new_track: None, copy: mods.alt })
+                    Some(Drag::Move { clips, grab_tick, start_track, offset: Tick::ZERO, track_delta: 0, new_track: None, copy: copy_modifier(app, mods) })
                 } else {
                     // A linked or multitrack selection gets one destination per source track.
                     let new_track = start_row
@@ -705,7 +719,7 @@ fn drag_update(app: &mut FilmcraftApp, ui: &mut egui::Ui, resp: &egui::Response,
                             let (vh, ah) = (app.ui.timeline.video_track_h, app.ui.timeline.audio_track_h);
                             new_track_at(seq, layout, p.y, vh, ah).filter(|(kind, _)| *kind == s.kind)
                         });
-                    Some(Drag::Move { clips, grab_tick, start_track, offset, track_delta, new_track, copy: mods.alt })
+                    Some(Drag::Move { clips, grab_tick, start_track, offset, track_delta, new_track, copy: copy_modifier(app, mods) })
                 }
             }
             Drag::Trim { clip, edge, mode, from, linked, .. } => seq.find_item(clip).map(|(_, it)| {
@@ -832,9 +846,10 @@ fn commit_drag(app: &mut FilmcraftApp, ctx: &egui::Context, resp: &egui::Respons
                         .filter_map(|c| seq.find_item(*c).map(|(tid, it)| json!({"clip": c.0, "track": to(tid), "time": (it.start + offset).max(Tick::ZERO).0})))
                         .collect();
                     // Option held while dropping copies (Premiere: Option-drag duplicates)
-                    let copying = copy || mods.alt;
-                    let captions = track_select_drag_captions(app, copying, mods.command);
-                    Some(app.session.execute("timeline.move", json!({"moves": moves, "insert": mods.command, "linked": false, "copy": copying, "captions": captions})))
+                    let copying = copy || copy_modifier(app, mods);
+                    let inserting = mods.command && !app.session.shortcuts.vegacut_mouse;
+                    let captions = track_select_drag_captions(app, copying, inserting);
+                    Some(app.session.execute("timeline.move", json!({"moves": moves, "insert": inserting, "linked": false, "copy": copying, "captions": captions})))
                 }
                 Drag::Trim { clip, edge, mode, delta, linked, .. } if delta != Tick::ZERO => Some(app.session.execute(
                     "timeline.trim",

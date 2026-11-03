@@ -528,3 +528,28 @@ fn turning_animations_off_zooms_and_scrolls_in_one_step() {
     d.frames(2);
     assert!(animation_time(&mut d) > 0.0);
 }
+
+#[test]
+fn vegacut_wheel_zoom_and_modifier_scroll() {
+    let mut d = Driver::tall();
+    d.exec("shortcuts.loadPreset", json!({"name": "VegaCut"}));
+    d.wheel(0.2, 0.0, 20.0, json!({}));
+    let (_, pps, v, a) = d.view();
+    assert!((pps - 60.0).abs() < 1e-6);
+    assert_eq!((v, a), (0.0, 0.0));
+    d.wheel(0.2, 0.0, 80.0, json!({"ctrl": true}));
+    let (_, pps, v, a) = d.view();
+    assert_eq!(pps, 60.0);
+    assert!(v > 0.0);
+    assert_eq!(a, 0.0);
+    d.wheel(0.8, 0.0, -80.0, json!({"ctrl": true}));
+    assert!(d.view().3 > 0.0);
+    let before = d.view();
+    d.wheel(0.8, 0.0, -60.0, json!({"shift": true}));
+    let after = d.view();
+    assert!((after.0 - before.0 - 1.0).abs() < 1e-6);
+    assert_eq!((after.1, after.2, after.3), (before.1, before.2, before.3));
+    d.exec("shortcuts.loadPreset", json!({"name": "FilmCraft Default"}));
+    d.wheel(0.2, 0.0, 40.0, json!({}));
+    assert_eq!(d.view().1, 60.0, "switching back restores scrolling without zoom");
+}

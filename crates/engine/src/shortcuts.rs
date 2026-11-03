@@ -60,7 +60,8 @@ pub const DEFAULT_PRESET: &str = "FilmCraft Default";
 pub const PREMIERE_PRESET: &str = "Premiere Pro Compatible";
 pub const FCP_PRESET: &str = "Final Cut Pro Compatible";
 pub const AVID_PRESET: &str = "Avid Media Composer Compatible";
-pub const BUILTIN_PRESETS: [&str; 4] = [DEFAULT_PRESET, PREMIERE_PRESET, FCP_PRESET, AVID_PRESET];
+pub const VEGACUT_PRESET: &str = "VegaCut";
+pub const BUILTIN_PRESETS: [&str; 5] = [VEGACUT_PRESET, DEFAULT_PRESET, PREMIERE_PRESET, FCP_PRESET, AVID_PRESET];
 
 const FILE_FORMAT: &str = "filmcraft-keyboard-shortcuts";
 const DIR_NAME: &str = "Keyboard Shortcuts";
@@ -478,10 +479,14 @@ pub struct PresetFile {
     #[serde(default)]
     pub modified: bool,
     pub bindings: Vec<Binding>,
+    /// VegaCut timeline wheel and copy-drag gestures, retained by custom presets.
+    #[serde(default)]
+    pub vegacut_mouse: bool,
 }
 
 #[derive(Clone, Debug)]
 struct Snapshot {
+    vegacut_mouse: bool,
     bindings: Vec<Binding>,
     preset: String,
     modified: bool,
@@ -490,6 +495,8 @@ struct Snapshot {
 /// The active key bindings and their editing history.
 #[derive(Clone, Debug)]
 pub struct Shortcuts {
+    /// Mouse behavior travels with the keyboard profile, including saved copies.
+    pub vegacut_mouse: bool,
     pub bindings: Vec<Binding>,
     /// Preset the active set came from (or was saved as).
     pub preset: String,
@@ -514,6 +521,7 @@ impl Default for Shortcuts {
 impl Shortcuts {
     pub fn new() -> Self {
         let mut s = Shortcuts {
+            vegacut_mouse: false,
             bindings: Vec::new(),
             preset: DEFAULT_PRESET.into(),
             modified: false,
@@ -617,6 +625,7 @@ impl Shortcuts {
         b.extend(self.audit_for(p));
         let table: Vec<Entry> = match name {
             DEFAULT_PRESET => Vec::new(),
+            VEGACUT_PRESET => presets::VEGACUT.to_vec(),
             PREMIERE_PRESET => presets::premiere(),
             FCP_PRESET => presets::FINAL_CUT.to_vec(),
             AVID_PRESET => presets::AVID.to_vec(),
@@ -674,6 +683,7 @@ impl Shortcuts {
         match serde_json::from_slice::<PresetFile>(&bytes) {
             Ok(f) => {
                 self.preset = f.name.clone();
+                self.vegacut_mouse = if !f.modified && BUILTIN_PRESETS.contains(&f.name.as_str()) { f.name == VEGACUT_PRESET } else { f.vegacut_mouse };
                 if !f.modified
                     && let Some(b) = self.builtin(&f.name)
                 {
@@ -690,7 +700,15 @@ impl Shortcuts {
     }
 
     fn file(&self, name: &str, modified: bool) -> PresetFile {
-        PresetFile { format: FILE_FORMAT.into(), version: 1, name: name.into(), platform: None, modified, bindings: self.bindings.clone() }
+        PresetFile {
+            format: FILE_FORMAT.into(),
+            version: 1,
+            name: name.into(),
+            platform: None,
+            modified,
+            bindings: self.bindings.clone(),
+            vegacut_mouse: self.vegacut_mouse,
+        }
     }
 
     fn persist(&self) {
@@ -706,10 +724,11 @@ impl Shortcuts {
     // ---------------------------------------------------------------- editing
 
     fn snapshot(&self) -> Snapshot {
-        Snapshot { bindings: self.bindings.clone(), preset: self.preset.clone(), modified: self.modified }
+        Snapshot { vegacut_mouse: self.vegacut_mouse, bindings: self.bindings.clone(), preset: self.preset.clone(), modified: self.modified }
     }
 
     fn restore(&mut self, s: Snapshot) {
+        self.vegacut_mouse = s.vegacut_mouse;
         self.bindings = s.bindings;
         self.preset = s.preset;
         self.modified = s.modified;
@@ -843,20 +862,34 @@ impl Shortcuts {
     }
 
     pub fn load_preset(&mut self, name: &str) -> std::result::Result<(), String> {
-        let bindings = match self.builtin(name) {
-            Some(b) => b,
+        let (bindings, vegacut_mouse) = match self.builtin(name) {
+            Some(b) => (b, name == VEGACUT_PRESET),
             None => {
                 let path = self.preset_path(name).ok_or("no data directory for custom presets")?;
                 let f = read_file(&path)?;
-                convert(f.bindings, f.platform)
+                (convert(f.bindings, f.platform), f.vegacut_mouse)
             }
         };
         let before = self.snapshot();
         self.bindings = bindings;
+        self.vegacut_mouse = vegacut_mouse;
         self.preset = name.into();
         self.modified = false;
         self.changed(before);
         Ok(())
+    }
+
+    /// Desktop default only when no keyboard preferences have ever been saved.
+    /// Upgrades and explicit choices keep their active profile, even FilmCraft Default.
+    pub fn use_vegacut_if_unconfigured(&mut self) {
+        let saved = self.presets_dir().is_some_and(|d| d.join(ACTIVE_FILE).exists());
+        if !saved && self.preset == DEFAULT_PRESET && !self.modified {
+            if let Err(e) = self.load_preset(VEGACUT_PRESET) {
+                log::warn!("initializing VegaCut shortcuts: {e}");
+            }
+            self.undo.clear();
+            self.redo.clear();
+        }
     }
 
     pub fn save_preset(&mut self, name: &str) -> std::result::Result<PathBuf, String> {
@@ -901,12 +934,21 @@ impl Shortcuts {
         let name = import_name(&f.name, path);
         let bindings: Vec<Binding> = convert(f.bindings, f.platform).into_iter().filter(|b| self.known(&b.command)).collect();
         if let Some(p) = self.preset_path(&name) {
-            let file = PresetFile { format: FILE_FORMAT.into(), version: 1, name: name.clone(), platform: None, modified: false, bindings: bindings.clone() };
+            let file = PresetFile {
+                format: FILE_FORMAT.into(),
+                version: 1,
+                name: name.clone(),
+                platform: None,
+                modified: false,
+                bindings: bindings.clone(),
+                vegacut_mouse: f.vegacut_mouse,
+            };
             write_file(&p, &file)?;
         }
         if activate {
             let before = self.snapshot();
             self.bindings = bindings;
+            self.vegacut_mouse = f.vegacut_mouse;
             self.preset = name.clone();
             self.modified = false;
             self.changed(before);
@@ -1124,7 +1166,7 @@ fn err(cmd: &str) -> impl Fn(String) -> EngineError + '_ {
 
 fn presets_json(s: &Session) -> Value {
     let sc = &s.shortcuts;
-    json!({"active": sc.preset, "modified": sc.modified, "builtin": BUILTIN_PRESETS, "custom": sc.user_presets(), "canUndo": sc.can_undo(), "canRedo": sc.can_redo()})
+    json!({"active": sc.preset, "vegacutMouse": sc.vegacut_mouse, "modified": sc.modified, "builtin": BUILTIN_PRESETS, "custom": sc.user_presets(), "canUndo": sc.can_undo(), "canRedo": sc.can_redo()})
 }
 
 fn list(s: &Session, p: &Value) -> Value {

@@ -390,3 +390,46 @@ fn default_keymaps_have_no_conflicts_on_any_platform() {
         assert!(mac.iter().any(|b| b.command == cmd && b.keys == keys), "{cmd} {keys} on macOS");
     }
 }
+
+#[test]
+fn vegacut_profile_survives_custom_export_undo_and_restart() {
+    use crate::shortcuts::{DEFAULT_PRESET, VEGACUT_PRESET};
+    let dir = temp_dir("vegacut");
+    let mut s = Shortcuts::new();
+    s.set_dir(&dir);
+    s.use_vegacut_if_unconfigured();
+    assert_eq!(s.preset, VEGACUT_PRESET);
+    assert!(s.vegacut_mouse);
+    for (command, key) in [("sequence.addEdit", "S"), ("clip.group", "G"), ("clip.ungroup", "U"), ("sequence.snap", "F8")] {
+        assert_eq!(s.primary(command).as_deref(), Some(key));
+    }
+    s.save_preset("My VegaCut").unwrap();
+    s.load_preset(DEFAULT_PRESET).unwrap();
+    assert!(!s.vegacut_mouse);
+    assert!(s.undo());
+    assert!(s.vegacut_mouse);
+    assert!(s.redo());
+    assert!(!s.vegacut_mouse);
+    s.load_preset("My VegaCut").unwrap();
+    s.begin_editing();
+    s.load_preset(DEFAULT_PRESET).unwrap();
+    s.cancel_editing();
+    assert!(s.vegacut_mouse);
+    let out = dir.join("export.json");
+    s.export(&out).unwrap();
+    s.load_preset(DEFAULT_PRESET).unwrap();
+    s.import(&out, true).unwrap();
+    assert!(s.vegacut_mouse);
+    let mut reopened = Shortcuts::new();
+    reopened.set_dir(&dir);
+    reopened.use_vegacut_if_unconfigured();
+    assert_eq!(reopened.preset, "My VegaCut");
+    assert!(reopened.vegacut_mouse);
+    reopened.load_preset(DEFAULT_PRESET).unwrap();
+    let mut explicit_legacy = Shortcuts::new();
+    explicit_legacy.set_dir(&dir);
+    explicit_legacy.use_vegacut_if_unconfigured();
+    assert_eq!(explicit_legacy.preset, DEFAULT_PRESET, "never overwrite a saved choice on upgrade");
+    assert!(!explicit_legacy.vegacut_mouse);
+    std::fs::remove_dir_all(dir).unwrap();
+}

@@ -451,3 +451,27 @@ pub const AVID: &[Entry] = &[
     ("view.zoomOut", "Cmd+[", ""),
     ("markers.add", "F5", ""),
 ];
+
+/// VegaCut's first Vegas-style editing profile. Remaining commands retain FilmCraft defaults.
+/// Timeline-scoped keys avoid changing source/project panel navigation.
+pub const VEGACUT: &[Entry] = &[
+    ("sequence.addEdit", "S", ""),
+    ("clip.group", "G", ""),
+    ("clip.ungroup", "U", ""),
+    ("sequence.snap", "F8", ""),
+    ("playback.loop", "Q", ""),
+    ("playhead.start", "Cmd+Home", ""),
+    ("playhead.end", "Cmd+End", ""),
+    ("playhead.stepBack", "Alt+Left", ""),
+    ("playhead.stepForward", "Alt+Right", ""),
+    ("playback.toggle", "Space", ""),
+    ("playback.reverse", "J", ""),
+    ("playback.stop", "K", ""),
+    ("playback.forward", "L", ""),
+    ("markers.add", "M", ""),
+    ("markers.markIn", "I", ""),
+    ("markers.markOut", "O", ""),
+    ("tool.selection", "Cmd+D", ""),
+    ("view.zoomIn", "Up", "Timeline"),
+    ("view.zoomOut", "Down", "Timeline"),
+];

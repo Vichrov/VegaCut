@@ -283,3 +283,39 @@ fn dragging_a_clip_to_another_track_carries_its_fade_in_the_preview() {
     let (a1, tr1) = (v2t.items.iter().find(|i| i.id == a0.id).unwrap(), &v2t.transitions[0]);
     assert_eq!(tr1.start.0 - tr0.start.0, a1.start.0 - a0.start.0, "the committed transition moved with the clip");
 }
+
+#[test]
+fn vegacut_ctrl_drag_copies_without_inserting_and_undoes() {
+    let mut h = harness(true);
+    h.state_mut().session.shortcuts.load_preset("VegaCut").unwrap();
+    let q0 = h.state().session.active_sequence().unwrap().clone();
+    let a0 = q0.video_tracks[0].items[0].clone();
+    let tr0 = q0.video_tracks[0].transitions[0].clone();
+    let a_rect = rect(&h, &format!("timeline.clip.{}", a0.id.0));
+    let tr_rect = rect(&h, &format!("timeline.transition.{}", tr0.id.0));
+    let y = a_rect.center().y;
+    // Ctrl copies in VegaCut; it must not also insert/ripple the timeline.
+    h.input_mut().events.push(egui::Event::ModifiersChanged(Modifiers { ctrl: true, command: true, ..Default::default() }));
+    let x0 = a_rect.left() + 110.0; // clear of the fade band and the edge zones
+    pointer(&mut h, pos2(x0, y), Some(true));
+    for i in 1..=6 {
+        pointer(&mut h, pos2(x0 + 20.0 * i as f32, y), None);
+    }
+    // a ghost transition beside the copy; the original stays exactly where it was
+    let ghost = rect(&h, &format!("timeline.transition.{}.copy", tr0.id.0));
+    assert_eq!(rect(&h, &format!("timeline.transition.{}", tr0.id.0)), tr_rect, "the original transition stays at home");
+    assert!((ghost.min.x - tr_rect.min.x) > 60.0, "ghost {ghost:?} did not follow the copy from {tr_rect:?}");
+    pointer(&mut h, pos2(x0 + 140.0, y), Some(false));
+    h.input_mut().events.push(egui::Event::ModifiersChanged(Modifiers::NONE));
+    step(&mut h);
+    let q1 = h.state().session.active_sequence().unwrap().clone();
+    assert_eq!(q1.video_tracks[0].transitions.len(), 2, "the copy carried its own transition");
+    let (home, copy_tr) = (q1.video_tracks[0].transitions[0].clone(), q1.video_tracks[0].transitions[1].clone());
+    assert_eq!(home.start, tr0.start, "the original's transition stayed");
+    assert_ne!(copy_tr.id, tr0.id, "the copy's transition is a fresh one");
+    let copy = q1.video_tracks[0].items.iter().find(|i| i.id != a0.id).expect("a new clip appeared");
+    assert_eq!(copy_tr.to, Some(copy.id), "the copy's fade sits on the copy");
+    assert_eq!(q1.find_item(a0.id).unwrap().1.start, a0.start, "copy must not shift its source");
+    h.state_mut().session.execute("edit.undo", json!({})).unwrap();
+    assert_eq!(*h.state().session.active_sequence().unwrap(), q0, "one undo restores the whole drag");
+}
