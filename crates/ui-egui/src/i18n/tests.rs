@@ -27,7 +27,7 @@ fn catalogs_are_well_formed() {
 
 #[test]
 fn the_current_language_is_per_thread() {
-    // any entry the Spanish catalog has
+    // any entry the Russian catalog has
     let (entries, _) = catalog::parse_entries(include_str!("ru.tsv"));
     let Some((_, en, es)) = entries.into_iter().find(|(ctx, en, es)| ctx.is_empty() && en != es) else { return };
     set_current(Language::Ru);
@@ -342,8 +342,6 @@ fn tl_literals_are_found_and_unescaped() {
     let src = "a(tl!(\"Save\")); b(tl!(\"Say \\\"hi\\\"\\n\")); tl!(x); tlf!(\"{n} file(s)\", n);";
     assert_eq!(tl_literals(src), ["Save", "Say \"hi\"\n", "{n} file(s)"]);
 }
-
-type App = crate::FilmcraftApp;
 
 fn assert_bundled_fonts_cover(text: impl Iterator<Item = char>) {
     let ctx = egui::Context::default();
