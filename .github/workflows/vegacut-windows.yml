@@ -2,7 +2,7 @@ name: VegaCut Windows x64
 
 on:
   push:
-    branches: [main, vegacut-v020]
+    branches: [main, vegacut-v030]
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
         python - <<'PYTHON'
         import base64
         from pathlib import Path
-        for name in ['vegacut-v020.png', 'vegacut-v020-ru.png']:
+        for name in ['vegacut-v030.png', 'vegacut-v030-ru.png']:
             data = Path('/tmp/vegacut-screens', name).read_bytes()
             print('VEGACUT_SCREENSHOT ' + name + ' ' + base64.b64encode(data).decode())
         PYTHON
@@ -47,14 +47,14 @@ jobs:
           path: dist/release/vegacut-*
           if-no-files-found: error
       - name: Publish alpha release
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/vegacut-v020'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/vegacut-v030'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $Version = [regex]::Match((Get-Content apps/filmcraft/Cargo.toml -Raw), '(?m)^version = "([^"]+)"').Groups[1].Value
           if (-not $Version) { throw 'Missing version' }
-          if ($env:GITHUB_REF -eq 'refs/heads/vegacut-v020') {
+          if ($env:GITHUB_REF -eq 'refs/heads/vegacut-v030') {
             git fetch --unshallow origin
             if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch release history' }
             git fetch origin main
