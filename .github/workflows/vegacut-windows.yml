@@ -47,13 +47,23 @@ jobs:
           path: dist/release/vegacut-*
           if-no-files-found: error
       - name: Publish alpha release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/vegacut-v020'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $Version = [regex]::Match((Get-Content apps/filmcraft/Cargo.toml -Raw), '(?m)^version = "([^"]+)"').Groups[1].Value
           if (-not $Version) { throw 'Missing version' }
+          if ($env:GITHUB_REF -eq 'refs/heads/vegacut-v020') {
+            git fetch --unshallow origin
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch release history' }
+            git fetch origin main
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch main' }
+            git merge-base --is-ancestor origin/main HEAD
+            if ($LASTEXITCODE -ne 0) { throw 'Main changed; candidate requires review' }
+            git push origin HEAD:main
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot fast-forward main' }
+          }
           gh release view "v$Version" --json tagName *> $null
           if ($LASTEXITCODE -eq 0) { Write-Host "Version already published"; exit 0 }
           gh release create "v$Version" dist/release/vegacut-* --target $env:GITHUB_SHA --prerelease --title "VegaCut v$Version" --notes-file docs/VEGACUT_RELEASE.md
