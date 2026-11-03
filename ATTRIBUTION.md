@@ -37,24 +37,7 @@ iconography, images or other Adobe assets; open licences only; every asset attri
 | `docs/images/filmcraft-scopes.png` | FilmCraft contributors | Original work: FilmCraft UI crop (scopes of a Charade (1963) frame, public domain) | MIT OR Apache-2.0 |
 | `docs/images/filmcraft-effects.png` | FilmCraft contributors | Original work: FilmCraft screenshot crop; NASA Earth Views (US Government work, public domain) | MIT OR Apache-2.0; footage public domain |
 | `docs/images/filmcraft-timeline.png` | FilmCraft contributors | Original work: FilmCraft UI crop; thumbnails from Night of the Living Dead (1968) and Carnival of Souls (1962), CC0 Chopin waveform | MIT OR Apache-2.0; film frames public domain |
-| `assets/app-icon/filmcraft.svg` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; canonical vector | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `packaging/macos/dmg/background.svg` | @XusBadia | Original work: FilmCraft macOS DMG window background, derived from the FilmCraft app icon (`assets/app-icon/filmcraft.svg`); rendered to `background.tiff` by `packaging/macos/dmg/generate.py` | MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`) |
 | `packaging/macos/dmg/background.tiff` | @XusBadia | Rendered from `packaging/macos/dmg/background.svg` by `packaging/macos/dmg/generate.py` | MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`) |
-| `assets/app-icon/filmcraft-small.svg` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; lighter vector | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/filmcraft-1024.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; 1024 px render | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/filmcraft-macos-512.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; macOS runtime Dock icon (512 px) | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/filmcraft.icns` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; macOS .icns | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/filmcraft.ico` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Windows .ico (16-256 px) | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/16x16/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 16 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/24x24/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 24 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/32x32/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 32 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/48x48/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 48 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/64x64/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 64 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/128x128/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 128 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/256x256/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 256 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/512x512/apps/ai.storyteller.filmcraft.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme 512 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `assets/app-icon/hicolor/scalable/apps/ai.storyteller.filmcraft.svg` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; Linux hicolor theme scalable | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
-| `apps/filmcraft-web/web/favicon.png` | Brandon Thomas (FilmCraft owner) | Original work: FilmCraft app icon (owl with ear tufts), drawn by the owner in ArtCraft and vectorised; 128 px | MIT OR Apache-2.0 (`assets/app-icon/LICENSE.txt`) |
 
 ## Golden test images
 
@@ -149,14 +132,6 @@ remove them (AGENTS.md §1.8).
 
 | File | Author | Source | Licence |
 |---|---|---|---|
-| `docs/brand/artcraft-logo-white.png` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft wordmark, light ink for dark backgrounds) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
-| `docs/brand/artcraft-logo-white.svg` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft wordmark, light ink for dark backgrounds) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
-| `docs/brand/artcraft-logo.png` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft wordmark (symbol + "ARTCRAFT"), dark ink for light backgrounds) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
-| `docs/brand/artcraft-logo.svg` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft wordmark (symbol + "ARTCRAFT"), dark ink for light backgrounds) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
-| `docs/brand/artcraft-mark-black.png` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft symbol ("A" mark), black) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
-| `docs/brand/artcraft-mark-black.svg` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft symbol ("A" mark), black) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
-| `docs/brand/artcraft-mark.png` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft symbol ("A" mark), blue) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
-| `docs/brand/artcraft-mark.svg` | ArtCraft Team | Original work: first-party ArtCraft brand mark (ArtCraft symbol ("A" mark), blue) | ArtCraft trademark, not open source; `docs/brand/LICENSE-brand.txt` (not MIT/Apache) |
 
 ## Third-party source code
 
@@ -186,3 +161,19 @@ SHA-256 (`crates/speech/src/models.rs`, `docs/transcripts.md`).
 | `epaint_default_fonts::UBUNTU_LIGHT` (dependency font input) | Canonical Ltd. | [egui 6d518fc7](https://github.com/storytold/egui/tree/6d518fc799681571963842f95b55a6b68431b15a/crates/epaint_default_fonts/fonts) | Ubuntu Font Licence 1.0 (Copyright 2011 Canonical Ltd.; full upstream text in `NOTICE`) | Ubuntu-Light.ttf is egui's default proportional fallback, included by `default_fonts`; `system_fonts` is not enabled. Dependency asset unmodified here; no font file copied into this repository. |
 | `epaint_default_fonts::NOTO_EMOJI_REGULAR` (dependency font input) | The Noto Project Authors (Google) | [egui 6d518fc7](https://github.com/storytold/egui/tree/6d518fc799681571963842f95b55a6b68431b15a/crates/epaint_default_fonts/fonts), [Noto Emoji](https://fonts.google.com/noto/specimen/Noto+Emoji) | OFL-1.1 (Copyright 2013 Google Inc.; full upstream text in `NOTICE`) | NotoEmoji-Regular.ttf is the monochrome emoji fallback, included because the workspace enables `monochrome_emoji_fonts`. Dependency asset unmodified here; no font file copied into this repository. |
 | `epaint_default_fonts::HACK_REGULAR` (dependency font input) | Source Foundry Authors; Bitstream Inc.; DejaVu contributors | [egui 6d518fc7](https://github.com/storytold/egui/tree/6d518fc799681571963842f95b55a6b68431b15a/crates/epaint_default_fonts/fonts), [Hack](https://github.com/source-foundry/Hack) | MIT (Copyright (c) 2018 Source Foundry Authors) and the Bitstream Vera License (Copyright (c) 2003 Bitstream, Inc.); the DejaVu work is public domain; full upstream notices in `NOTICE` | Hack-Regular.ttf is egui's default monospace fallback, included by `default_fonts`. Dependency asset unmodified here; no font file copied into this repository. |
+| `apps/filmcraft-web/web/favicon.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/filmcraft-1024.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/filmcraft-macos-512.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/filmcraft-small.svg` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/filmcraft.icns` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/filmcraft.ico` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/filmcraft.svg` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/128x128/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/16x16/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/24x24/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/256x256/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/32x32/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/48x48/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/512x512/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/64x64/apps/ai.storyteller.filmcraft.png` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |
+| `assets/app-icon/hicolor/scalable/apps/ai.storyteller.filmcraft.svg` | VegaCut contributors | Original cut-V artwork; tools/vegacut-icons.py | MIT OR Apache-2.0 |

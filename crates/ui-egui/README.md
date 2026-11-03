@@ -1,3 +1,12 @@
+# VegaCut frontend fork notes
+
+VegaCut keeps internal crate/automation names for upstream compatibility. User-facing branding
+and project links refer to this fork. Restricted ArtCraft marks are removed; the wordmark is
+rendered with the bundled open font. Automatic updates are off; the manual command opens the
+fork releases page using the normal host/browser link path.
+
+Validation is tracked in ../../docs/VEGACUT_VALIDATION.md.
+
 # FilmCraft interface
 
 The egui frontend draws panels and dialogs, and dispatches project changes through the engine.

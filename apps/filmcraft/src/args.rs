@@ -18,7 +18,7 @@ Options:
   --recover          recover the newest unsaved changes without asking
   --no-recover       start without asking about unsaved changes
   --data-dir <dir>   folder for auto-save, crash recovery and logs
-                     (also: FILMCRAFT_DATA_DIR)
+                     (also: VEGACUT_DATA_DIR)
   --graphics <mode>  start with this graphics mode and keep it: default,
                      dx12 (Windows), software (Windows, Linux);
                      `--graphics default` undoes an automatic fallback
@@ -119,7 +119,7 @@ pub fn parse(env_control_port: Option<String>, args: impl IntoIterator<Item = Os
     Ok(Cli::Run(l))
 }
 
-/// Whether a launch file is a FilmCraft project. The extension's case does not matter: Windows file
+/// Whether a launch file is a VegaCut project. The extension's case does not matter: Windows file
 /// associations and the Linux MIME glob start the app for `CUT.FCPROJ` too (#850).
 pub fn is_project(path: &str) -> bool {
     Path::new(path).extension().is_some_and(|e| e.eq_ignore_ascii_case("fcproj"))

@@ -116,7 +116,7 @@ impl FilmcraftApp {
     }
 }
 
-/// Whether a dropped file is a FilmCraft project (opened, not imported).
+/// Whether a dropped file is a VegaCut project (opened, not imported).
 fn is_project_file(path: &str) -> bool {
     std::path::Path::new(path).extension().is_some_and(|e| e.eq_ignore_ascii_case("fcproj"))
 }

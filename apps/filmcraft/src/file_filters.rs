@@ -42,7 +42,7 @@ pub fn extensions(exts: &[&str]) -> Vec<String> {
 /// Extensions for an "All files" filter: a single `*` and nothing else. rfd's XDG portal
 /// backend special-cases `*` into the glob `*` (its GTK and Zenity backends build `*.*`),
 /// so every file shows — including a saved project on a system whose shared-mime-info
-/// package never registered `.fcproj`, where the "FilmCraft Project" filter hides them
+/// package never registered `.fcproj`, where the "VegaCut Project" filter hides them
 /// all and the dialog offers no other way to reach the file (#1644).
 pub fn all_files() -> Vec<String> {
     extensions(&["*"])

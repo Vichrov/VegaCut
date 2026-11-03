@@ -1,28 +1,27 @@
 //! Community and project links (Help menu, About dialog, header Discord button, Home screen).
 //!
-//! FilmCraft is part of the ArtCraft family: the community lives on the ArtCraft Discord, every
-//! app has a page on the ArtCraft website and a public GitHub repository.
+//! Independent fork links. Legacy command IDs are retained for automation compatibility.
 
 /// The app's short name, used in the website and repository URLs.
-pub const APP: &str = "filmcraft";
+pub const APP: &str = "vegacut";
 
-/// The ArtCraft community Discord.
-pub const DISCORD: &str = "https://discord.gg/artcraft";
-/// The ArtCraft website.
-pub const WEBSITE: &str = "https://getartcraft.com";
-/// FilmCraft's page on the ArtCraft website.
-pub const APP_PAGE: &str = "https://getartcraft.com/apps/filmcraft";
-/// FilmCraft's source repository.
-pub const GITHUB: &str = "https://github.com/storytold/filmcraft";
-/// New issue on FilmCraft's repository.
-pub const ISSUES: &str = "https://github.com/storytold/filmcraft/issues";
+/// Fork feedback destination; legacy constant name.
+pub const DISCORD: &str = "https://github.com/Vichrov/VegaCut/issues";
+/// Fork repository.
+pub const WEBSITE: &str = "https://github.com/Vichrov/VegaCut";
+/// Fork releases.
+pub const APP_PAGE: &str = "https://github.com/Vichrov/VegaCut/releases";
+/// VegaCut's source repository.
+pub const GITHUB: &str = "https://github.com/Vichrov/VegaCut";
+/// New issue on VegaCut's repository.
+pub const ISSUES: &str = "https://github.com/Vichrov/VegaCut/issues";
 
 /// (command id, label, url) for every link, in menu order.
 pub const ALL: [(&str, &str, &str); 5] = [
-    ("help.discord", "Join the ArtCraft Discord…", DISCORD),
-    ("help.website", "ArtCraft Website", WEBSITE),
-    ("help.appPage", "FilmCraft on getartcraft.com", APP_PAGE),
-    ("help.github", "FilmCraft on GitHub", GITHUB),
+    ("help.discord", "VegaCut feedback…", DISCORD),
+    ("help.website", "VegaCut repository", WEBSITE),
+    ("help.appPage", "VegaCut releases", APP_PAGE),
+    ("help.github", "VegaCut on GitHub", GITHUB),
     ("help.reportIssue", "Report an Issue…", ISSUES),
 ];
 
@@ -39,7 +38,7 @@ pub fn url_for(command: &str) -> Option<&'static str> {
 }
 
 /// What a Help menu item does, shown when the pointer rests on it: just the address a link opens
-/// in the web browser, or what an item that stays inside FilmCraft does.
+/// in the web browser, or what an item that stays inside VegaCut does.
 pub fn menu_hint(command: &str) -> Option<String> {
     let url = if command == "help.filmcraftHelp" { Some(crate::panels::keyboard::HELP_URL) } else { url_for(command) };
     if let Some(url) = url {
@@ -49,8 +48,8 @@ pub fn menu_hint(command: &str) -> Option<String> {
         match command {
             "help.revealLogFiles" => tl!("Saves this session's log and shows it in your file manager."),
             "help.systemCompatibilityReport" => tl!("Shows a report on this computer."),
-            "app.about" => tl!("Shows the version, community links and credits in a FilmCraft window."),
-            "app.checkForUpdates" => tl!("Looks for a newer FilmCraft release and offers to update."),
+            "app.about" => tl!("Shows the version, community links and credits in a VegaCut window."),
+            "app.checkForUpdates" => tl!("Looks for a newer VegaCut release and offers to update."),
             _ => return None,
         }
         .to_string(),
@@ -127,8 +126,8 @@ mod tests {
 
     #[test]
     fn urls_follow_the_artcraft_scheme() {
-        assert_eq!(APP_PAGE, format!("{WEBSITE}/apps/{APP}"));
-        assert_eq!(GITHUB, format!("https://github.com/storytold/{APP}"));
+        assert_eq!(APP_PAGE, format!("{GITHUB}/releases"));
+        assert_eq!(GITHUB, "https://github.com/Vichrov/VegaCut");
         assert!(ALL.iter().all(|(id, _, u)| id.starts_with("help.") && u.starts_with("https://")));
         assert_eq!(url_for("help.discord"), Some(DISCORD));
         assert_eq!(url_for("help.nope"), None);

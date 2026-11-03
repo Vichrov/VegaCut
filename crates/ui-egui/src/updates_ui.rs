@@ -47,21 +47,9 @@ impl FilmcraftApp {
     }
 }
 
-pub(crate) fn check(app: &mut FilmcraftApp) -> Result<Value, String> {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        app.updates_rt.check_requested = true;
-        app.updates_rt.manual_window_open = true;
-        if let Some(ctx) = &app.updates_rt.repaint {
-            ctx.request_repaint();
-        }
-        Ok(Value::Null)
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        app.updates_rt.manual_window_open = true;
-        Ok(Value::Null)
-    }
+pub(crate) fn check(app: &mut FilmcraftApp, ctx: &egui::Context) -> Result<Value, String> {
+    crate::links::open(app, ctx, "https://github.com/Vichrov/VegaCut/releases");
+    Ok(Value::Null)
 }
 
 pub(crate) fn tick(app: &mut FilmcraftApp, ctx: &egui::Context) {
@@ -113,7 +101,7 @@ pub(crate) fn show(app: &mut FilmcraftApp, ctx: &egui::Context) {
     #[cfg(target_arch = "wasm32")]
     if app.updates_rt.manual_window_open {
         let mut open = true;
-        egui::Window::new(crate::i18n::t("FilmCraft Updates"))
+        egui::Window::new(crate::i18n::t("VegaCut Updates"))
             .open(&mut open)
             .collapsible(false)
             .resizable(false)
@@ -156,8 +144,8 @@ mod tests {
         let release = craft_update::Release {
             tag: "v99.0.0".into(),
             version: craft_update::parse_version("99.0.0"),
-            name: "FilmCraft 99.0.0".into(),
-            html_url: "https://github.com/storytold/filmcraft/releases/tag/v99.0.0".into(),
+            name: "VegaCut 99.0.0".into(),
+            html_url: "https://github.com/Vichrov/VegaCut/releases/tag/v99.0.0".into(),
             ..Default::default()
         };
         app.updates_rt.updater.offer(release);

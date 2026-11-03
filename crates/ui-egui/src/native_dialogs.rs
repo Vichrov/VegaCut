@@ -43,9 +43,9 @@ pub enum FileDialog {
     OpenFiles { exts: Vec<String> },
     /// Choose one file.
     OpenFile { filter: String, exts: Vec<String> },
-    /// Choose a FilmCraft project to open.
+    /// Choose a VegaCut project to open.
     OpenProject,
-    /// Save a FilmCraft project, suggesting `name`.
+    /// Save a VegaCut project, suggesting `name`.
     SaveProject { name: String },
     /// Save a file, suggesting `name`.
     SaveAs { filter: String, exts: Vec<String>, name: String, adds_ext: bool },
@@ -255,7 +255,7 @@ pub(crate) const EXPORT_SAVE_DIALOGS: [(&str, &str, &str); 7] = [
     ("file.exportFcpxml", "FCPXML", "fcpxml"),
     ("file.exportOtio", "OpenTimelineIO", "otio"),
     ("file.exportAle", "Avid Log Exchange", "ale"),
-    ("file.exportSelectionProject", "FilmCraft Project", "fcproj"),
+    ("file.exportSelectionProject", "VegaCut Project", "fcproj"),
 ];
 
 /// `then` for `dialog`: a save dialog's answer gets its extension ([`with_save_extension`]), and

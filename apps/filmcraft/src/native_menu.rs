@@ -36,7 +36,7 @@ fn quit_item(app: &FilmcraftApp) -> (&'static str, Option<Accelerator>) {
 pub type MenuUpdater = Box<dyn FnMut(&[Item])>;
 
 /// Swap only Edit while a native color window owns keyboard focus. Native predefined
-/// actions go to AppKit's first responder, rather than FilmCraft's timeline inbox.
+/// actions go to AppKit's first responder, rather than VegaCut's timeline inbox.
 pub type NativeTextMenu = Rc<dyn Fn(bool) -> Result<(), String>>;
 
 pub fn install(app: &FilmcraftApp, ctx: egui::Context) -> (Receiver<String>, MenuUpdater, NativeTextMenu) {
@@ -45,9 +45,9 @@ pub fn install(app: &FilmcraftApp, ctx: egui::Context) -> (Receiver<String>, Men
     let mut native: Vec<(Item, MenuItem)> = Vec::new();
     let mut titles: Vec<(String, Submenu)> = Vec::new();
     let bar = Menu::new();
-    let app_menu = Submenu::new("FilmCraft", true);
+    let app_menu = Submenu::new("VegaCut", true);
     let [settings_label, hide_label, hide_others_label, quit_label] = NATIVE_APP_MENU;
-    // FilmCraft ▸ Settings ▸ <category> (Premiere's app-menu layout; General is Cmd+,)
+    // VegaCut ▸ Settings ▸ <category> (Premiere's app-menu layout; General is Cmd+,)
     let settings = Submenu::new(app.ui.language.tr(settings_label), true);
     titles.push((settings_label.into(), settings.clone()));
     for it in items.iter().filter(|i| i.id.starts_with("app.settings.")) {
@@ -58,7 +58,7 @@ pub fn install(app: &FilmcraftApp, ctx: egui::Context) -> (Receiver<String>, Men
     }
     // About and Discord repeat Help menu commands: same translated labels, updated with them
     let label = |id: &str, english: &str| items.iter().find(|i| i.id == id).map_or_else(|| english.to_string(), |i| i.label.clone());
-    let about = MenuItem::with_id("app.about", label("app.about", "About FilmCraft"), true, None);
+    let about = MenuItem::with_id("app.about", label("app.about", "About VegaCut"), true, None);
     let discord = MenuItem::with_id("help.discord", label("help.discord", "Join the ArtCraft Discord…"), true, None);
     for (id, mi) in [("app.about", &about), ("help.discord", &discord)] {
         if let Some(it) = items.iter().find(|i| i.id == id) {
@@ -140,8 +140,8 @@ pub fn install(app: &FilmcraftApp, ctx: egui::Context) -> (Receiver<String>, Men
         if use_native == native_shown.get() {
             return Ok(());
         }
-        let regular = edit_menu.as_ref().ok_or("FilmCraft Edit menu is unavailable")?;
-        let index = MENUS.iter().position(|top| *top == "Edit").ok_or("FilmCraft Edit menu is unavailable")? + 1;
+        let regular = edit_menu.as_ref().ok_or("VegaCut Edit menu is unavailable")?;
+        let index = MENUS.iter().position(|top| *top == "Edit").ok_or("VegaCut Edit menu is unavailable")? + 1;
         let (old, new) = if use_native { (regular, &color_edit) } else { (&color_edit, regular) };
         menu_bar.insert(new, index).map_err(|e| e.to_string())?;
         if let Err(error) = menu_bar.remove(old) {
