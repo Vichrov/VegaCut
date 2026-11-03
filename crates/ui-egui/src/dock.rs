@@ -862,7 +862,32 @@ mod tests {
         for w in WORKSPACES {
             let layout = workspace(w);
             let fixed = layout.root.as_ref().map(fixed_splits).unwrap_or_default();
-            assert_eq!(fixed, vec![SplitSize::FixedFirst(TOOLS_WIDTH), SplitSize::FixedSecond(METERS_WIDTH)], "{w}");
+            // VegaCut visits meters above the timeline before tools below it. Tree traversal
+            // order is not a layout invariant; the two fixed widths and their owners are.
+            assert_eq!(fixed.len(), 2, "{w}: only tools and meters have fixed widths");
+            assert!(fixed.contains(&SplitSize::FixedFirst(TOOLS_WIDTH)), "{w}: tools width");
+            assert!(fixed.contains(&SplitSize::FixedSecond(METERS_WIDTH)), "{w}: meters width");
+            if let Some(root) = &layout.root {
+                assert_fixed_panel_owners(root);
+            }
+        }
+    }
+
+    fn assert_fixed_panel_owners(node: &Node<PanelKind>) {
+        if let Node::Split { axis, size, first, second } = node {
+            match size {
+                SplitSize::FixedFirst(_) => {
+                    assert_eq!(*axis, SplitAxis::Horizontal);
+                    assert!(matches!(first.as_ref(), Node::Tabs { panels, .. } if panels == &[PanelKind::Tools]));
+                }
+                SplitSize::FixedSecond(_) => {
+                    assert_eq!(*axis, SplitAxis::Horizontal);
+                    assert!(matches!(second.as_ref(), Node::Tabs { panels, .. } if panels == &[PanelKind::AudioMeters]));
+                }
+                SplitSize::Ratio(_) => {}
+            }
+            assert_fixed_panel_owners(first);
+            assert_fixed_panel_owners(second);
         }
     }
 
