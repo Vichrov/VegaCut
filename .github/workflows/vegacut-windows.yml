@@ -2,15 +2,34 @@ name: VegaCut Windows x64
 
 on:
   push:
-    branches: [main]
-    paths: ['apps/filmcraft/Cargo.toml', 'Cargo.toml', '.github/workflows/vegacut-windows.yml', 'packaging/windows/vegacut-portable.ps1']
+    branches: [main, vegacut-v020]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  validate:
+    uses: storytold/craft-common-actions/.github/workflows/gate.yml@main
+    with:
+      craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
+      timeout-minutes: 120
+      packages: >-
+        pkg-config libxkbcommon-dev libwayland-dev libx11-dev libxcb1-dev libxcursor-dev
+        libxrandr-dev libxi-dev libfontconfig1-dev libfreetype-dev mesa-vulkan-drivers
+        libasound2-dev
+      command: |
+        cargo xtask ci
+        FILMCRAFT_UI_SNAPSHOT_DIR=/tmp/vegacut-screens cargo test --locked --workspace workspaces_ui::vegacut_workspace_controls_and_persistence -- --exact
+        python - <<'PYTHON'
+        import base64
+        from pathlib import Path
+        for name in ['vegacut-v020.png', 'vegacut-v020-ru.png']:
+            data = Path('/tmp/vegacut-screens', name).read_bytes()
+            print('VEGACUT_SCREENSHOT ' + name + ' ' + base64.b64encode(data).decode())
+        PYTHON
   windows:
+    needs: validate
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
@@ -35,5 +54,7 @@ jobs:
         run: |
           $Version = [regex]::Match((Get-Content apps/filmcraft/Cargo.toml -Raw), '(?m)^version = "([^"]+)"').Groups[1].Value
           if (-not $Version) { throw 'Missing version' }
+          gh release view "v$Version" --json tagName *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Host "Version already published"; exit 0 }
           gh release create "v$Version" dist/release/vegacut-* --target $env:GITHUB_SHA --prerelease --title "VegaCut v$Version" --notes-file docs/VEGACUT_RELEASE.md
           if ($LASTEXITCODE -ne 0) { throw 'Release publication failed' }
