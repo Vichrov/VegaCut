@@ -207,33 +207,7 @@ pub(super) static CATEGORIES: &[Category] = &[
         id: "general",
         title: "General",
         rows: &[
-            f(
-                "general.interfaceLanguage",
-                "Interface Language",
-                Kind::Choice(&[
-                    ("system", "System Language"),
-                    ("en", "English"),
-                    // Alphabetical by the language's own name after English; Cyrillic, then
-                    // CJK names follow the Latin ones. Edit ▸ Language lists them the same way.
-                    ("id", "Bahasa Indonesia"),
-                    ("bs", "Bosanski"),
-                    ("cs", "Čeština"),
-                    ("de", "Deutsch"),
-                    ("es", "Español"),
-                    ("fr", "Français"),
-                    ("it", "Italiano"),
-                    ("pl", "Polski"),
-                    ("pt-br", "Português (Brasil)"),
-                    ("sv", "Svenska"),
-                    ("tr", "Türkçe"),
-                    ("ru", "Русский"),
-                    ("uk", "Українська"),
-                    ("ja", "日本語"),
-                    ("zh-cn", "简体中文"),
-                    ("ko", "한국어"),
-                ]),
-                true,
-            ),
+            f("general.interfaceLanguage", "Interface Language", Kind::Choice(&[("system", "System Language"), ("en", "English"), ("ru", "Русский")]), true),
             f("general.atStartup", "At Startup", Kind::Choice(STARTUP), true),
             f("general.whenOpeningProject", "When Opening a Project", Kind::Choice(OPENING), false),
             Row::Group(

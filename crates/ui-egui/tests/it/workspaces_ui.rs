@@ -25,11 +25,15 @@ struct Driver {
 impl Driver {
     /// The demo project with its preferences (and workspaces) in `data`.
     fn launch(data: &Path) -> Self {
+        Self::launch_with_default(data, false)
+    }
+
+    fn launch_with_default(data: &Path, vegacut: bool) -> Self {
         let mut session = Session::default();
         session.execute("file.openDemoProject", json!({})).expect("demo project");
         session.prefs_path = Some(data.join("preferences.json"));
         let (tx, rx) = channel();
-        let app = FilmcraftApp::new(session).with_control(rx);
+        let app = if vegacut { FilmcraftApp::new_vegacut(session) } else { FilmcraftApp::new(session) }.with_control(rx);
         let snapshots = std::env::var_os("FILMCRAFT_UI_SNAPSHOT_DIR").map(PathBuf::from);
         let mut b = Harness::builder().with_size(egui::vec2(1600.0, 980.0)).with_max_steps(10_000);
         if snapshots.is_some() {
@@ -165,6 +169,7 @@ fn built_in_keeps_saved_changes_and_restores(d: &mut Driver) {
 fn save_switch_reset_rename_delete_and_restart() {
     let data = data_dir("cycle");
     let mut d = Driver::launch(&data);
+    d.menu("window.workspace.editing", json!({}));
     assert_eq!(d.workspace(), "Editing");
     assert!(d.shows(PanelKind::Metadata));
 
@@ -188,6 +193,7 @@ fn save_switch_reset_rename_delete_and_restart() {
             "Effects",
             "Learning",
             "Review",
+            "VegaCut",
             "Vertical",
             "Reset to Saved Layout",
             "Save Changes to this Workspace",
@@ -322,4 +328,67 @@ fn the_header_workspace_menu_saves_resets_and_opens_the_dialogs() {
     d.click("header.workspaces.edit");
     assert!(matches!(d.app().ui.workspace_dialog, Some(WorkspaceDialog::Edit { .. })), "Edit Workspaces… opens its dialog");
     let _ = std::fs::remove_dir_all(&data);
+}
+
+/// VegaCut's initial workspace, real header controls, Undo, and saved-layout round trip.
+#[test]
+fn vegacut_workspace_controls_and_persistence() {
+    let data = data_dir("vegacut");
+    let mut d = Driver::launch_with_default(&data, true);
+    d.snapshot("vegacut-initial");
+    assert_eq!(d.workspace(), "VegaCut");
+    let rect = |d: &Driver, id: &str| {
+        let e = d.harness.state().auto.find(id).unwrap_or_else(|| panic!("missing {id}"));
+        egui::Rect::from_min_max(egui::pos2(e.rect[0], e.rect[1]), egui::pos2(e.rect[0] + e.rect[2], e.rect[1] + e.rect[3]))
+    };
+    let media = rect(&d, "panel.Project");
+    let preview = rect(&d, "panel.Program");
+    let timeline = rect(&d, "panel.Timeline");
+    assert!(media.center().x < preview.center().x);
+    assert!(timeline.center().y > media.max.y && timeline.center().y > preview.max.y);
+    assert!(timeline.width() > preview.width() * 1.5);
+    assert!(d.has("timeline.track.A1.volume"));
+    assert!(d.has("timeline.track.A1.pan"));
+    assert!(d.has("timeline.track.A1.muted"));
+    assert!(d.has("timeline.track.A1.solo"));
+    let track = d.app().session.active_sequence().unwrap().audio_tracks[0].id;
+    // Drawing must not round external mixer values or add undo steps.
+    let volume = -3.456789;
+    d.app().session.execute("mixer.setValue", json!({"strip":track.0,"lane":"volume","value":volume,"time":0})).unwrap();
+    d.frames(4);
+    let displayed = d.app().session.active_sequence().unwrap().track(track).unwrap().lane_value("volume", filmcraft_time::Tick::ZERO);
+    assert!((displayed - volume).abs() < 1e-8, "drawing must not edit a mixer value");
+    d.menu("edit.undo", json!({}));
+    assert_eq!(d.app().session.active_sequence().unwrap().track(track).unwrap().lane_value("volume", filmcraft_time::Tick::ZERO), 0.0);
+    for lane in ["volume", "pan"] {
+        let before = d.app().session.active_sequence().unwrap().track(track).unwrap().lane_value(lane, filmcraft_time::Tick::ZERO);
+        // Real pointer input reaches each slider, rather than calling a mixer command directly.
+        let slider = rect(&d, &format!("timeline.track.A1.{lane}"));
+        d.ok("ui.click", json!({"x":slider.min.x + 12.0,"y":slider.center().y}));
+        d.frames(3);
+        let changed = d.app().session.active_sequence().unwrap().track(track).unwrap().lane_value(lane, filmcraft_time::Tick::ZERO);
+        assert!((changed - before).abs() > 0.1, "{lane} slider must edit the track");
+        d.menu("edit.undo", json!({}));
+        let undone = d.app().session.active_sequence().unwrap().track(track).unwrap().lane_value(lane, filmcraft_time::Tick::ZERO);
+        assert!((undone - before).abs() < 0.001, "Undo restores {lane}");
+    }
+    d.menu("window.workspace.saveAs", json!({"name":"My VegaCut"}));
+    d.menu("window.workspace.editing", json!({}));
+    d.menu("window.workspace.myvegacut", json!({}));
+    assert_eq!(d.workspace(), "My VegaCut");
+    if let Some(dir) = d.snapshots.clone() {
+        d.frames(4);
+        std::fs::create_dir_all(&dir).unwrap();
+        d.harness.render().expect("render VegaCut workspace").save(dir.join("vegacut-v020.png")).unwrap();
+        d.menu("app.language.russian", json!({}));
+        d.frames(4);
+        d.harness.render().expect("render Russian VegaCut workspace").save(dir.join("vegacut-v020-ru.png")).unwrap();
+        d.menu("app.language.english", json!({}));
+    }
+    drop(d);
+    let mut reopened = Driver::launch_with_default(&data, true);
+    assert_eq!(reopened.workspace(), "My VegaCut");
+    reopened.menu("window.workspace.vegacut", json!({}));
+    assert_eq!(reopened.workspace(), "VegaCut");
+    let _ = std::fs::remove_dir_all(data);
 }

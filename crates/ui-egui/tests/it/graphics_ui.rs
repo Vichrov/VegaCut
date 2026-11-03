@@ -167,9 +167,9 @@ fn choice_and_stroke_width_accessible_names_follow_language() {
 
     assert_eq!(d.harness.get_by_role_and_label(Role::ComboBox, "Shape").value().as_deref(), Some("Rectangle"));
 
-    d.exec("prefs.set", json!({"key": "general.interfaceLanguage", "value": "es"}));
+    d.exec("prefs.set", json!({"key": "general.interfaceLanguage", "value": "ru"}));
     d.frames(4);
-    let es = filmcraft_ui_egui::i18n::Language::Es;
+    let es = filmcraft_ui_egui::i18n::Language::Ru;
     for (label, value) in [("Shape", "Rectangle"), ("Fill Type", "Solid"), ("Stroke Type", "Outer"), ("Stroke 2 Type", "Outer")] {
         assert_eq!(
             d.harness.get_by_role_and_label(Role::ComboBox, es.tr(label)).value().as_deref(),
@@ -226,9 +226,9 @@ fn effect_controls_text_accessible_name_follows_language() {
     d.ok("ui.panel.show", json!({"panel": "Effect Controls"}));
     d.frames(4);
 
-    d.exec("prefs.set", json!({"key": "general.interfaceLanguage", "value": "es"}));
+    d.exec("prefs.set", json!({"key": "general.interfaceLanguage", "value": "ru"}));
     d.frames(4);
-    let es = filmcraft_ui_egui::i18n::Language::Es;
+    let es = filmcraft_ui_egui::i18n::Language::Ru;
     assert_eq!(
         d.harness.get_by_role_and_label(Role::TextInput, es.tr("Source Text")).value().as_deref(),
         Some("Night Drive"),

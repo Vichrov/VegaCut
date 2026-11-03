@@ -207,11 +207,11 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn workspace_name_uppercasing_is_turkish_aware() {
-        crate::i18n::set_current(crate::i18n::Language::Tr);
-        assert_eq!(crate::i18n::to_uppercase("Birleştirme"), "BİRLEŞTİRME");
-        assert_eq!(crate::i18n::to_uppercase("Altyazılar ve Grafikler"), "ALTYAZILAR VE GRAFİKLER");
+    fn workspace_name_uppercasing_supports_russian_and_english() {
+        crate::i18n::set_current(crate::i18n::Language::Ru);
+        assert_eq!(crate::i18n::to_uppercase("Монтаж"), "МОНТАЖ");
+        assert_eq!(crate::i18n::to_uppercase("Титры и графика"), "ТИТРЫ И ГРАФИКА");
         crate::i18n::set_current(crate::i18n::Language::En);
-        assert_eq!(crate::i18n::to_uppercase("Birleştirme"), "BIRLEŞTIRME");
+        assert_eq!(crate::i18n::to_uppercase("Editing"), "EDITING");
     }
 }

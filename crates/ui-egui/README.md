@@ -1,3 +1,15 @@
+# VegaCut 0.2 editing workspace
+
+The desktop default `VegaCut` workspace groups Project, Media Browser, Effects (including transitions),
+Effect Controls, titles, Source and History at the upper left; Program and meters at the upper
+right; Tools and Timeline occupy the bottom. The other built-in workspaces remain available.
+Saved user workspaces are not overwritten. `window.workspace.vegacut` selects the new layout.
+
+Audio rows at least 88 pt tall and headers at least 220 pt wide expose volume/stereo pan.
+They use `mixer.touch`, `mixer.release` and `mixer.setValue`, including automation and Undo.
+Surround balance remains in the full mixer's 2-D panner. Compact rows keep Mute/Solo and the
+full mixer as the alternative. Automation IDs are `timeline.track.A1.volume` and `.pan`.
+
 # VegaCut frontend fork notes
 
 VegaCut keeps internal crate/automation names for upstream compatibility. User-facing branding
@@ -57,37 +69,15 @@ render screenshots with wgpu.
 
 ## Localisation
 
-Edit > Language offers English, Japanese, Spanish, Brazilian Portuguese, Ukrainian, Simplified
-Chinese, German, Russian, French, Indonesian, Korean, Italian, Czech, Polish, Swedish and Turkish (all but Ukrainian cover
-the whole interface; Ukrainian covers the core menus). The language is stored in the engine's `general.interfaceLanguage` preference,
-restored on startup, and also available in Settings > General.
-Its default, System Language (`system`), follows the operating system: the first of the user's
-preferred languages that the interface has (the host supplies them through
-`HostHooks::system_languages`: `sys-locale` on the desktop, `navigator.languages` on the web),
-otherwise English.
-The `app.language.*` UI commands and `prefs.set` reach it through the control channel.
-Japanese requires a craft-fonts build or a suitable installed font.
+VegaCut supports only English and Russian in Edit > Language and Settings > General.
+System Language picks the first supported locale and otherwise uses English.
+Removed language preferences migrate to English without discarding the other settings.
 
-English source strings are lookup keys in `src/i18n/<code>.tsv`. `tl!` translates literals, `tlf!`
-fills translated templates, and `i18n::t` translates names from registries. Placeholder values
-(including user filenames containing braces) are inserted literally. Catalog translations are
-original work using ordinary language, without proprietary localisation resources.
-
-Spanish, Japanese, Simplified Chinese, French, Brazilian Portuguese, German and Russian cover
-menus, panels, dialogs, settings and registry labels. Searches accept both the
-translated label and its English source, including Unicode capitals. Project content, command ids
-and preference values retain their original values. Engine errors, CLI and MCP messages remain
-English. Ukrainian currently covers the core menus; it falls back to English elsewhere.
-
-A string a catalog lacks shows in English, so a missing translation never fails a test or a
-build. `cargo xtask i18n-report` prints each language's missing strings (menus, `tl!` literals and
-registry names) and its entries whose source the interface no longer has; `cargo xtask ci` prints
-the same report in its log.
-
-Verification: `cargo test -p filmcraft-ui-egui` checks catalog syntax, duplicate keys, placeholders
-and UI behaviour in other languages (switching, search, font coverage); `cargo xtask ci` runs the
-workspace gates. Visual checks use the control channel to switch language and capture the resulting
-panels.
+English strings are in Rust source; `src/i18n/ru.tsv` contains the Russian catalog.
+`tl!`, `tlf!` and `i18n::t` translate labels while keeping automation IDs unchanged.
+Searches accept both Russian and English. Missing translations fall back to English.
+`cargo xtask i18n-report` reports missing Russian translations. Catalog validation checks
+syntax, duplicate keys, placeholders and ellipses; UI tests cover switching and persistence.
 
 ## Source playback
 
@@ -235,3 +225,5 @@ than one clip is selected, matching the existing Speed control.
 
 `clip_dialogs_ui::duration_text_edits_speed_and_rejects_invalid_input` exercises real
 text input, validation, application, Cancel, and Undo/Redo.
+
+The desktop calls `FilmcraftApp::new_vegacut`; `new` retains the upstream embedding layout.

@@ -271,7 +271,7 @@ fn app_creator(launch: Launch, graphics: graphics::GraphicsStart, created: Arc<A
                 Err(e) => log::error!("recovery failed: {e}"),
             }
         }
-        let mut app = FilmcraftApp::new(session);
+        let mut app = FilmcraftApp::new_vegacut(session);
         app.set_startup_update_check(false);
         app.graphics_notice = notice;
         if recover == Some(false) {

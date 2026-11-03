@@ -412,6 +412,11 @@ impl Preferences {
     /// Parse a preferences document: migrate older layouts, repair values against the schema.
     pub fn from_value(mut v: Value) -> Self {
         settings::migrate(&mut v);
+        if let Some(language) = v.pointer_mut("/general/interfaceLanguage")
+            && language.as_str().is_some_and(|s| !matches!(s, "en" | "ru" | "system"))
+        {
+            *language = Value::String("en".into());
+        }
         settings::sanitize(&mut v, &Self::default().to_value());
         let mut p: Preferences = serde_json::from_value(v).unwrap_or_default();
         p.clamp();

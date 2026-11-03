@@ -197,11 +197,11 @@ fn apply_effect_appears_in_effect_controls() {
 }
 
 #[test]
-fn spanish_search_finds_effects_and_presets_with_stable_automation_ids() {
+fn russian_search_finds_effects_and_presets_with_stable_automation_ids() {
     let mut d = Driver::demo();
-    d.ok("ui.menu.invoke", json!({"id": "app.language.spanish"}));
+    d.ok("ui.menu.invoke", json!({"id": "app.language.russian"}));
     d.ok("ui.panel.show", json!({"panel": "Effects"}));
-    let es = filmcraft_ui_egui::i18n::Language::Es;
+    let es = filmcraft_ui_egui::i18n::Language::Ru;
     d.ok("ui.set", json!({"effectsSearch": es.tr("Gaussian Blur").to_uppercase()}));
     d.frames(3);
     assert!(d.element_ids("effects.item.").contains(&"effects.item.gaussian_blur".to_string()));

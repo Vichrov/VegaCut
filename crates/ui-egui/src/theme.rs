@@ -1,7 +1,7 @@
 //! Design tokens. Every widget reads colours/sizes from [`Tokens`] so themes apply everywhere.
 //!
-//! The default theme follows the look of Premiere Pro's current dark UI (values measured from
-//! black-box screenshots, see `plan/premiere/02-ui-ux.md`); fonts are Inter + JetBrains Mono (OFL).
+//! VegaCut defaults to compact neutral-gray panels, cyan controls and an amber playhead.
+//! Fonts are Inter + JetBrains Mono (OFL).
 
 use std::sync::Arc;
 
@@ -151,31 +151,31 @@ pub struct Tokens {
 
 impl Tokens {
     pub fn for_kind(kind: ThemeKind) -> Self {
-        // Measured from Premiere 26 "Darkest" (plan/premiere/02-ui-ux.md §1).
+        // Original VegaCut palette, with brighter track headers and separated alternating lanes.
         let dark = Tokens {
             kind,
-            app_bg: Color32::from_rgb(0, 0, 0),
-            header_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
-            panel_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
-            tab_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
+            app_bg: Color32::from_gray(26),
+            header_bg: Color32::from_gray(43),
+            panel_bg: Color32::from_gray(48),
+            tab_bg: Color32::from_gray(40),
             tab_text: Color32::from_rgb(0xb0, 0xb0, 0xb0),
             tab_text_active: Color32::from_rgb(0xd1, 0xd1, 0xd1),
-            focus: Color32::from_rgb(0x57, 0x94, 0xec),
+            focus: Color32::from_rgb(73, 184, 209),
             accent: Color32::from_rgb(0x2f, 0x6b, 0xdf),
             accent_hover: Color32::from_rgb(0x3f, 0x7c, 0xe8),
-            text: Color32::from_rgb(0xd1, 0xd1, 0xd1),
-            text_dim: Color32::from_rgb(0xb0, 0xb0, 0xb0),
-            text_faint: Color32::from_rgb(0x6e, 0x6e, 0x6e),
+            text: Color32::from_gray(224),
+            text_dim: Color32::from_gray(190),
+            text_faint: Color32::from_gray(145),
             icon: Color32::from_rgb(0xb0, 0xb0, 0xb0),
             icon_active: Color32::from_rgb(0xd1, 0xd1, 0xd1),
-            hover: Color32::from_rgb(0x2c, 0x2c, 0x2c),
+            hover: Color32::from_gray(62),
             pressed: Color32::from_rgb(0x4b, 0x4b, 0x4b),
-            field_bg: Color32::from_rgb(0x0e, 0x0e, 0x0e),
-            field_border: Color32::from_rgb(0x30, 0x30, 0x30),
-            separator: Color32::from_rgb(0x30, 0x30, 0x30),
-            row_alt: Color32::from_rgb(0x21, 0x21, 0x21),
-            row_selected: Color32::from_rgb(0x33, 0x33, 0x33),
-            hot_text: Color32::from_rgb(0x40, 0x96, 0xf3),
+            field_bg: Color32::from_gray(31),
+            field_border: Color32::from_gray(75),
+            separator: Color32::from_gray(31),
+            row_alt: Color32::from_gray(52),
+            row_selected: Color32::from_rgb(58, 78, 86),
+            hot_text: Color32::from_rgb(105, 204, 225),
             pill_active_bg: Color32::from_rgb(0x3a, 0x3a, 0x3a),
             clip_bar_bg: Color32::from_rgb(58, 58, 70),
             control_surface: Color32::from_rgb(0x24, 0x24, 0x24),
@@ -219,27 +219,27 @@ impl Tokens {
             scroll_thumb_hover: Color32::from_gray(0x6a),
             vertical_scroll_thumb: Color32::from_gray(80),
             disabled_clip_bg: Color32::from_gray(0x2a),
-            tl_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
-            tl_track_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
-            tl_track_bg_alt: Color32::from_rgb(0x1d, 0x1d, 0x1d),
-            tl_header_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
-            tl_ruler_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
+            tl_bg: Color32::from_gray(31),
+            tl_track_bg: Color32::from_gray(43),
+            tl_track_bg_alt: Color32::from_gray(47),
+            tl_header_bg: Color32::from_gray(56),
+            tl_ruler_bg: Color32::from_gray(48),
             tl_ruler_tick: Color32::from_rgb(0x8d, 0x8d, 0x8d),
             tl_ruler_text: Color32::from_rgb(0xb0, 0xb0, 0xb0),
-            playhead: Color32::from_rgb(0x58, 0x95, 0xec),
-            track_target: Color32::from_rgb(0x26, 0x5b, 0xc1),
+            playhead: Color32::from_rgb(245, 204, 89),
+            track_target: Color32::from_rgb(38, 110, 131),
             in_out_shade: Color32::from_rgb(0x3f, 0x3f, 0x3f),
             clip_selected_border: Color32::from_rgb(0xeb, 0xeb, 0xeb),
             render_red: Color32::from_rgb(0xe3, 0x48, 0x50),
             render_yellow: Color32::from_rgb(0xf0, 0xf0, 0x4f),
             render_green: Color32::from_rgb(0x2d, 0x9d, 0x78),
-            monitor_bg: Color32::from_rgb(0x1d, 0x1d, 0x1d),
-            timecode: Color32::from_rgb(0x40, 0x96, 0xf3),
+            monitor_bg: Color32::from_gray(23),
+            timecode: Color32::from_rgb(227, 230, 233),
             danger: Color32::from_rgb(0xdc, 0x51, 0x3d),
             radius: 0.0,
-            radius_sm: 4.0,
-            gap: 4.0,
-            tab_h: 32.0,
+            radius_sm: 2.0,
+            gap: 3.0,
+            tab_h: 26.0,
         };
         match kind {
             ThemeKind::Dark => dark,

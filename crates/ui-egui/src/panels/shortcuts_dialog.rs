@@ -1029,10 +1029,10 @@ mod localization_tests {
     }
 
     #[test]
-    fn command_search_accepts_turkish_casing() {
-        crate::i18n::set_current(crate::i18n::Language::Tr);
+    fn command_search_accepts_russian_casing() {
+        crate::i18n::set_current(crate::i18n::Language::Ru);
         let row = json!({"id": "marker.in_out", "label": "Add Range Marker to In and Out", "category": "Marker", "shortcuts": []});
-        for query in ["ÇIKIŞ", "çıkış", "Çıkış"] {
+        for query in ["МАРКЕР", "маркер", "Маркер"] {
             assert!(matches_search(&row, query), "{query}");
         }
         crate::i18n::set_current(crate::i18n::Language::En);

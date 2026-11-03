@@ -3722,3 +3722,5 @@
 	{frames} frames ({seconds} s)	{frames} кадров ({seconds} с)
 	{name} already exists, so nothing was exported. To replace it, choose it in the save dialog.	«{name}» уже существует, поэтому ничего не было экспортировано. Чтобы заменить его, выберите этот файл в диалоге сохранения.
 	“{file}” already exists in “{folder}”. Do you want to replace it?	«{file}» уже существует в «{folder}». Заменить его?
+	VegaCut	VegaCut
+track header	Pan	Панорама

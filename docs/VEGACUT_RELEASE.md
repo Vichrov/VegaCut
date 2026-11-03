@@ -1,6 +1,6 @@
-# VegaCut v0.1.0
+# VegaCut v0.2.0
 
-Independent VegaCut identity and original icon; isolated preferences and recovery; Windows x64 portable packaging; fork-specific release and update links.
+Adds the VegaCut workspace: media/effects tabs at upper left, preview at upper right and a wide timeline below. English and Russian interface only. Neutral gray theme, larger audio headers, volume and pan controls with Undo, and saved workspace support.
 
 VegaCut is an independent Windows x64 fork of FilmCraft with a Vegas-inspired workflow.
 

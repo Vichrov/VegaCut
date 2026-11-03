@@ -9,6 +9,8 @@ Early development. Version 0.1 establishes the fork; 0.2 introduces its editing 
 A version number is not a claim of production readiness. See [known issues](KNOWN_ISSUES.md)
 and [validation](docs/VEGACUT_VALIDATION.md).
 
+Interface languages: **Русский** and **English**.
+
 ## Build
 
 Use Rust 1.95 or later and the platform dependencies in [contributing](docs/contributing.md).

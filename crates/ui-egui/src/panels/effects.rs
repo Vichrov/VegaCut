@@ -336,13 +336,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn effects_search_matches_turkish_casing() {
-        crate::i18n::set_current(crate::i18n::Language::Tr);
+    fn effects_search_matches_russian_casing() {
+        crate::i18n::set_current(crate::i18n::Language::Ru);
         let ctx = egui::Context::default();
         let session = filmcraft_engine::Session::default();
         let mut app = FilmcraftApp::new(session);
         let rect = Rect::from_min_size(pos2(0.0, 0.0), vec2(400.0, 600.0));
-        for query in ["IŞIK", "ışık", "Işık"] {
+        for query in ["ЗАСВЕТ", "засвет", "Засвет"] {
             app.ui.effects_search = query.to_string();
             app.auto.begin_frame();
             let mut out = ctx.run_ui(egui::RawInput::default(), |ui| {

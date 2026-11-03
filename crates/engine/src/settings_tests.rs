@@ -27,61 +27,17 @@ fn interface_language_persists_and_rejects_hostile_values() {
     let dir = tmp_dir("interface-language");
     let path = dir.join("preferences.json");
     let mut s = Session { prefs_path: Some(path.clone()), ..Session::default() };
-    set(&mut s, "general.interfaceLanguage", json!("es"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "es");
-    for value in [json!("xx"), json!("es-MX"), json!("de-DE"), json!("fr-FR"), json!(null), json!(-1), json!({}), json!("x".repeat(4096))] {
-        assert!(s.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": value})).is_err());
-        assert_eq!(s.prefs.general.interface_language, "es");
+    for code in ["en", "ru", "system"] {
+        set(&mut s, "general.interfaceLanguage", json!(code));
+        assert_eq!(Preferences::load(&path).general.interface_language, code);
     }
-    assert_eq!(Preferences::load(&path).general.interface_language, "es");
-    set(&mut s, "general.interfaceLanguage", json!("de"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "de");
-    set(&mut s, "general.interfaceLanguage", json!("fr"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "fr");
-    // Indonesian is stored as `id`, not a locale tag or the legacy `in` code
-    for value in [json!("id-ID"), json!("in"), json!("ID")] {
-        assert!(s.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": value})).is_err());
+    for value in [json!("es"), json!("ja"), json!("de"), json!("tr"), json!("ru-RU"), json!(null), json!(-1), json!({}), json!("x".repeat(4096))] {
+        assert!(s.execute("prefs.set", json!({"key":"general.interfaceLanguage","value":value})).is_err());
+        assert_eq!(s.prefs.general.interface_language, "system");
     }
-    set(&mut s, "general.interfaceLanguage", json!("id"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "id");
-    // Italian is stored as `it`, not a locale tag
-    for value in [json!("it-IT"), json!("IT")] {
-        assert!(s.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": value})).is_err());
-    }
-    set(&mut s, "general.interfaceLanguage", json!("it"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "it");
-    // Korean and Czech likewise store only their bare codes.
-    for value in [json!("ko-KR"), json!("KO")] {
-        assert!(s.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": value})).is_err());
-    }
-    set(&mut s, "general.interfaceLanguage", json!("ko"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "ko");
-    for value in [json!("cs-CZ"), json!("CS")] {
-        assert!(s.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": value})).is_err());
-    }
-    set(&mut s, "general.interfaceLanguage", json!("cs"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "cs");
-    set(&mut s, "general.interfaceLanguage", json!("pl"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "pl");
-    // Swedish is stored as `sv`, not a locale tag
-    for value in [json!("sv-SE"), json!("sv-FI"), json!("SV")] {
-        assert!(s.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": value})).is_err());
-    }
-    set(&mut s, "general.interfaceLanguage", json!("sv"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "sv");
-    // Turkish is stored as `tr`, not a locale tag
-    for value in [json!("tr-TR"), json!("TR")] {
-        assert!(s.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": value})).is_err());
-    }
-    set(&mut s, "general.interfaceLanguage", json!("tr"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "tr");
-    // back to following the operating system (#218)
-    set(&mut s, "general.interfaceLanguage", json!("system"));
-    assert_eq!(Preferences::load(&path).general.interface_language, "system");
     std::fs::remove_dir_all(dir).unwrap();
 }
 
-/// A new installation follows the operating system's language (#218); a saved choice is kept.
 #[test]
 fn interface_language_defaults_to_the_system_language() {
     assert_eq!(Preferences::default().general.interface_language, "system");
@@ -1250,4 +1206,13 @@ fn selection_follows_playhead_is_in_the_settings_registry() {
     assert_eq!(cat, "timeline");
     assert!(matches!(f.kind, Kind::Bool));
     assert_eq!(settings::field("timeline.selectionFollowsPlayhead").map(|f| f.key), Some("timeline.selectionFollowsPlayhead"));
+}
+
+#[test]
+fn removed_interface_languages_migrate_without_resetting_other_preferences() {
+    for code in ["es", "ja", "de", "zh-cn", "tr"] {
+        let prefs = Preferences::from_value(json!({"general":{"interfaceLanguage":code},"autoSave":{"enabled":false}}));
+        assert_eq!(prefs.general.interface_language, "en");
+        assert!(!prefs.auto_save.enabled);
+    }
 }

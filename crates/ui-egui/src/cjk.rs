@@ -80,18 +80,6 @@ fn find_system_font(sample: &str, preferred: &[&str]) -> Option<Arc<FontData>> {
     Some(Arc::new(FontData::from_blob(Arc::new(face.data()?), face.info.index)))
 }
 
-/// Whether [`install`] has a Hangul face to add (an installed system face; none is bundled).
-/// The Korean interface needs one.
-pub(crate) fn korean_available() -> bool {
-    korean_font().is_some()
-}
-
-/// Whether [`install`] has a Chinese face to add: craft-fonts Hans/Hant faces, or an installed
-/// system face (scanned once per process). The Simplified Chinese interface needs one.
-pub(crate) fn available() -> bool {
-    craft_fonts().next().is_some() || system_font().is_some()
-}
-
 /// Append Chinese faces after the Latin UI fonts and the Japanese fallbacks. This keeps the
 /// interface's Latin typography and Japanese glyph forms, and covers the simplified and
 /// traditional hanzi in media and track names that Japanese fonts lack.

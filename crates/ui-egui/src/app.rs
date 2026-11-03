@@ -20,6 +20,20 @@ mod textures;
 mod window;
 
 impl FilmcraftApp {
+    /// Desktop fork defaults, without overriding a workspace the user saved.
+    /// `new` retains the embedding/automation layout for upstream compatibility.
+    pub fn new_vegacut(session: Session) -> Self {
+        let mut app = Self::new(session);
+        app.default_audio_track_h = 96.0;
+        app.ui.timeline.audio_track_h = 96.0;
+        app.ui.timeline.header_w = 260.0;
+        if app.workspaces.current.is_empty() {
+            app.ui.workspace = "VegaCut".into();
+            app.ui.dock = dock::workspace("VegaCut");
+        }
+        app
+    }
+
     /// Build the app around one shared `FrameServer`, falling back to the default language on an unparsable preference, loading workspaces from the prefs
     /// directory and seeding IME epoch/sequence identity.
     pub fn new(mut session: Session) -> Self {
@@ -101,6 +115,7 @@ impl FilmcraftApp {
             integrated_titlebar: false,
             last_timeline_width: 1000.0,
             timeline_view_of: None,
+            default_audio_track_h: state::TimelineView::default().audio_track_h,
             pending_timeline_drop: None,
             clip_mismatch: None,
             file_drag_hover: None,
@@ -198,21 +213,10 @@ impl FilmcraftApp {
 }
 
 impl FilmcraftApp {
-    /// Install the theme once, then keep fonts ready; a saved language without its system face
-    /// falls back to English as before.
+    /// Install the theme once, then keep document fonts ready.
     fn logic_theme(&mut self, ctx: &egui::Context) {
         if !self.styled {
             theme::install(ctx, &self.tokens);
-            // theme::install replaces the fonts: add the system Japanese font back (or fall back to
-            // English when a saved Japanese setting meets a system without one)
-            // (likewise Chinese without a Chinese face, Korean without a Hangul one)
-            let japanese_missing = self.ui.language == i18n::Language::Ja && !i18n::install_japanese_font(ctx);
-            if japanese_missing
-                || (self.ui.language == i18n::Language::ZhCn && !i18n::chinese_font_available())
-                || (self.ui.language == i18n::Language::Ko && !i18n::korean_font_available())
-            {
-                self.ui.language = i18n::Language::En;
-            }
             self.styled = true;
             ctx.request_repaint();
         } else {

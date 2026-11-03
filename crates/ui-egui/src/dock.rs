@@ -145,8 +145,8 @@ fn vsplit(size: SplitSize, a: Node<PanelKind>, b: Node<PanelKind>) -> Node<Panel
     Node::Split { axis: SplitAxis::Vertical, size, first: Box::new(a), second: Box::new(b) }
 }
 
-pub const WORKSPACES: [&str; 10] =
-    ["Editing", "Assembly", "Color", "Effects", "Audio", "Captions and Graphics", "Vertical", "Learning", "Review", "All Panels"];
+pub const WORKSPACES: [&str; 11] =
+    ["Editing", "Assembly", "Color", "Effects", "Audio", "Captions and Graphics", "Vertical", "Learning", "Review", "All Panels", "VegaCut"];
 
 /// The user's workspaces file, beside `preferences.json` in the data directory.
 pub const WORKSPACES_FILE: &str = "workspaces.json";
@@ -433,6 +433,16 @@ fn workspace_root(name: &str) -> Node<PanelKind> {
         )
     };
     match name {
+        // VegaCut: media and effects above a wide timeline, preview on the right.
+        "VegaCut" => vsplit(
+            Ratio(0.43),
+            hsplit(
+                Ratio(0.48),
+                tabs(&[Project, MediaBrowser, Effects, EffectControls, EssentialGraphics, Source, History], 0),
+                hsplit(SplitSize::FixedSecond(METERS_WIDTH), tabs(&[Program], 0), tabs(&[AudioMeters], 0)),
+            ),
+            hsplit(SplitSize::FixedFirst(TOOLS_WIDTH), tabs(&[Tools], 0), tabs(&[Timeline], 0)),
+        ),
         "Assembly" => vsplit(
             Ratio(0.52),
             hsplit(

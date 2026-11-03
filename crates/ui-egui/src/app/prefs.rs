@@ -91,18 +91,7 @@ impl FilmcraftApp {
                 }
                 None => i18n::Language::default(),
             };
-            if language == i18n::Language::Ja && !i18n::install_japanese_font(ctx) {
-                self.ui.language = i18n::Language::En;
-                self.ui.status = tl!("no Japanese font is installed on this system; the interface stays in English").into();
-            } else if language == i18n::Language::ZhCn && !i18n::chinese_font_available() {
-                self.ui.language = i18n::Language::En;
-                self.ui.status = tl!("no Chinese font is installed on this system; the interface stays in English").into();
-            } else if language == i18n::Language::Ko && !i18n::korean_font_available() {
-                self.ui.language = i18n::Language::En;
-                self.ui.status = tl!("no Korean font is installed on this system; the interface stays in English").into();
-            } else {
-                self.ui.language = language;
-            }
+            self.ui.language = language;
             i18n::set_current(self.ui.language);
             ctx.set_language(Some(self.ui.language.bcp47().to_owned()));
         }
@@ -177,7 +166,7 @@ impl FilmcraftApp {
                 }
                 None => {
                     let d = state::TimelineView::default();
-                    (v.v_scroll, v.a_scroll, v.video_track_h, v.audio_track_h) = (0.0, 0.0, d.video_track_h, d.audio_track_h);
+                    (v.v_scroll, v.a_scroll, v.video_track_h, v.audio_track_h) = (0.0, 0.0, d.video_track_h, self.default_audio_track_h);
                     (v.fit_pending, v.fit_empty) = (true, None);
                     self.timeline_view_last = None;
                 }

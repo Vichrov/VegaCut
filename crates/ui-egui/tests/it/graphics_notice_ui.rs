@@ -115,7 +115,7 @@ fn a_reset_that_cannot_be_saved_says_why_and_keeps_the_button() {
 fn the_notice_follows_the_interface_language() {
     let notice = GraphicsNotice::new("software rendering", Box::new(|| Ok(())));
     let mut d = Driver::new(Some(notice));
-    let es = filmcraft_ui_egui::i18n::Language::Es;
+    let es = filmcraft_ui_egui::i18n::Language::Ru;
     d.app().ui.language = es;
     d.frames(3);
     let title = filmcraft_ui_egui::i18n::fmt(es.tr("Safe graphics mode: {mode}"), &[("mode", es.tr("software rendering"))]);

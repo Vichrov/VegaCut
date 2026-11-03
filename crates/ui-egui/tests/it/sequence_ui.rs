@@ -873,15 +873,15 @@ fn shared_picker_preserves_exact_hex_and_incomplete_input_until_confirmation() {
 fn marker_and_palette_controls_translate_without_changing_automation_ids() {
     let mut d = Driver::demo();
     let marker = d.exec("markers.add", json!({"frame":30}))["marker"].as_u64().unwrap();
-    d.harness.state_mut().ui.language = filmcraft_ui_egui::i18n::Language::Es;
+    d.harness.state_mut().ui.language = filmcraft_ui_egui::i18n::Language::Ru;
     d.frames(3);
     d.right_marker(marker, false);
     d.click("timeline.markerMenu.properties");
     let labels = d.ok("ui.elements", json!({"prefix":"markerProperties.author"}));
-    assert_eq!(labels[0]["label"], "Autor");
+    assert_eq!(labels[0]["label"], "Автор");
     d.click("markerProperties.addColor");
     let labels = d.ok("ui.elements", json!({"prefix":"markerColor.picker"}));
-    assert_eq!(labels[0]["label"], "Selector de color");
+    assert_eq!(labels[0]["label"], "Выбор цвета");
     d.click("markerColor.cancel");
     d.click("markerProperties.cancel");
     d.ok("ui.panel.show", json!({"panel":"Markers"}));
@@ -889,7 +889,7 @@ fn marker_and_palette_controls_translate_without_changing_automation_ids() {
     d.click("markers.manageColors");
     d.click("palette.add");
     let labels = d.ok("ui.elements", json!({"prefix":"palette.save"}));
-    assert_eq!(labels[0]["label"], "Guardar color");
+    assert_eq!(labels[0]["label"], "Сохранить цвет");
     d.click("palette.cancelEdit");
     d.click("palette.close");
     d.harness.state_mut().ui.language = filmcraft_ui_egui::i18n::Language::En;

@@ -194,8 +194,9 @@ pub(super) fn draw_headers(app: &mut FilmcraftApp, ui: &mut egui::Ui, seq: &Sequ
         );
         if resp.double_clicked() {
             let h = if r.kind == TrackKind::Video { &mut app.ui.timeline.video_track_h } else { &mut app.ui.timeline.audio_track_h };
-            *h = if *h < 50.0 { 64.0 } else { 30.0 };
+            *h = if *h < 50.0 { 96.0 } else { 30.0 };
         }
+        audio_header_controls(app, ui, seq, tr, hrect, visible, &label, t, &mut actions);
     }
     // column separator
     ui.painter().line_segment([pos2(rect.min.x + hw - 0.5, vclip.min.y), pos2(rect.min.x + hw - 0.5, aclip.max.y + MASTER_H)], Stroke::new(1.0, t.separator));
@@ -281,5 +282,61 @@ fn header_line_buttons(
         }
         let kr = small(x + 64.0, upper_y);
         crate::panels::timeline_automation::header_button(app, ui, seq, r, kr, visible, label, t);
+    }
+}
+
+/// Compact track faders share the mixer's live override and automation command path.
+#[allow(clippy::too_many_arguments)]
+fn audio_header_controls(
+    app: &mut FilmcraftApp,
+    ui: &mut egui::Ui,
+    seq: &Sequence,
+    tr: &filmcraft_project::Track,
+    header: Rect,
+    visible: Rect,
+    label: &str,
+    t: &Tokens,
+    actions: &mut Vec<(String, Value)>,
+) {
+    use filmcraft_project::mixer::{FADER_MAX_DB, FADER_MIN_DB, LANE_PAN, LANE_VOLUME};
+    if tr.kind != TrackKind::Audio || header.height() < 88.0 || header.width() < 260.0 {
+        return;
+    }
+    let now = app.session.playhead();
+    for (lane, caption, y, range) in
+        [(LANE_VOLUME, tl!("Volume"), 46.0, FADER_MIN_DB..=FADER_MAX_DB), (LANE_PAN, crate::i18n::tr_ctx("track header", "Pan"), 67.0, -100.0..=100.0)]
+    {
+        // A surround strip has a 2-D panner in the full mixer, not a stereo balance.
+        if lane == LANE_PAN && seq.pans_51(tr.id) {
+            continue;
+        }
+        let rect = Rect::from_min_max(pos2(header.min.x + 154.0, header.min.y + y), pos2(header.max.x - 10.0, header.min.y + y + 18.0));
+        if !visible.contains_rect(rect) {
+            continue;
+        }
+        ui.painter().with_clip_rect(visible).text(pos2(header.min.x + 94.0, rect.center().y), Align2::LEFT_CENTER, caption, Tokens::ui(10.0), t.text_dim);
+        let mut value = app.session.previews.live.get(tr.id, lane).map(|v| v.value).unwrap_or_else(|| tr.lane_value(lane, now));
+        ui.scope_builder(egui::UiBuilder::new().id_salt(("track_fader", tr.id.0, lane)).max_rect(rect), |ui| {
+            ui.set_clip_rect(rect.intersect(visible));
+            ui.spacing_mut().slider_width = (rect.width() - 54.0).max(40.0);
+            ui.spacing_mut().interact_size.y = 18.0;
+            ui.spacing_mut().button_padding.y = 0.0;
+            let response = ui
+                .add(
+                    egui::Slider::new(&mut value, range)
+                        .clamping(egui::SliderClamping::Edits)
+                        .suffix(if lane == LANE_VOLUME { " dB" } else { "" })
+                        .max_decimals(1),
+                )
+                .on_hover_text(caption);
+            app.auto.add(&format!("timeline.track.{label}.{lane}"), response.rect, caption);
+            if response.changed() {
+                let command = if response.dragged() { "mixer.touch" } else { "mixer.setValue" };
+                actions.push((command.into(), json!({"strip": tr.id.0, "lane": lane, "value": value, "time": now.0})));
+            }
+            if response.drag_stopped() {
+                actions.push(("mixer.release".into(), json!({"strip": tr.id.0, "lane": lane, "time": now.0})));
+            }
+        });
     }
 }

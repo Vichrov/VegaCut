@@ -27,24 +27,8 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     uic!("window.floatPanel", "Undock Panel", [], None),
     uic!("window.closePanel", "Close Panel", [], None),
     uic!("app.language.english", "English", ["Edit", "Language"], None),
-    // Alphabetical by the language's own name after English; Cyrillic, then CJK names follow
-    // the Latin ones. Settings ▸ General ▸ Interface Language lists them the same way.
-    uic!("app.language.indonesian", "Bahasa Indonesia", ["Edit", "Language"], None),
-    uic!("app.language.bosnian", "Bosanski", ["Edit", "Language"], None),
-    uic!("app.language.czech", "Čeština", ["Edit", "Language"], None),
-    uic!("app.language.german", "Deutsch", ["Edit", "Language"], None),
-    uic!("app.language.spanish", "Español", ["Edit", "Language"], None),
-    uic!("app.language.french", "Français", ["Edit", "Language"], None),
-    uic!("app.language.italian", "Italiano", ["Edit", "Language"], None),
-    uic!("app.language.polish", "Polski", ["Edit", "Language"], None),
-    uic!("app.language.portuguese", "Português (Brasil)", ["Edit", "Language"], None),
-    uic!("app.language.swedish", "Svenska", ["Edit", "Language"], None),
-    uic!("app.language.turkish", "Türkçe", ["Edit", "Language"], None),
+    // Keep the same language order as Settings.
     uic!("app.language.russian", "Русский", ["Edit", "Language"], None),
-    uic!("app.language.ukrainian", "Українська", ["Edit", "Language"], None),
-    uic!("app.language.japanese", "日本語", ["Edit", "Language"], None),
-    uic!("app.language.chinese", "简体中文", ["Edit", "Language"], None),
-    uic!("app.language.korean", "한국어", ["Edit", "Language"], None),
     uic!("source.playback.toggle", "Source Play/Stop", [], None),
     uic!("source.playback.play", "Play Source", [], None),
     uic!("source.playback.stop", "Stop Source", [], None),
@@ -117,6 +101,7 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     uic!("view.theme.medium", "Dark", ["View", "Appearance"], None),
     uic!("view.theme.light", "Light", ["View", "Appearance"], None),
     uic!("view.appearanceMode.next", "Next Appearance Mode", ["View", "Appearance"], None),
+    uic!("window.workspace.vegacut", "VegaCut", ["Window", "Workspaces"], None),
     uic!("window.workspace.editing", "Editing", ["Window", "Workspaces"], Some("Alt+Shift+1")),
     uic!("window.workspace.assembly", "Assembly", ["Window", "Workspaces"], Some("Alt+Shift+2")),
     uic!("window.workspace.color", "Color", ["Window", "Workspaces"], Some("Alt+Shift+3")),
@@ -229,57 +214,8 @@ pub fn invoke_command(app: &mut FilmcraftApp, ctx: &egui::Context, id: &str, mut
         let object = params.as_object_mut().ok_or("command parameters must be an object")?;
         object.insert("target".into(), json!("source"));
     }
-    if matches!(
-        id,
-        "app.language.english"
-            | "app.language.japanese"
-            | "app.language.spanish"
-            | "app.language.portuguese"
-            | "app.language.ukrainian"
-            | "app.language.chinese"
-            | "app.language.german"
-            | "app.language.russian"
-            | "app.language.french"
-            | "app.language.indonesian"
-            | "app.language.italian"
-            | "app.language.bosnian"
-            | "app.language.korean"
-            | "app.language.czech"
-            | "app.language.polish"
-            | "app.language.swedish"
-            | "app.language.turkish"
-    ) {
-        // Japanese needs the craft-fonts (built with CRAFT_FONTS_DIR) or a font installed on the system
-        if id == "app.language.japanese" && !crate::i18n::install_japanese_font(ctx) {
-            return Err("no Japanese font is installed on this system (for example Noto Sans CJK JP); the interface stays in English".into());
-        }
-        // Chinese needs the Chinese fallback theme::install adds (craft-fonts or a system face)
-        if id == "app.language.chinese" && !crate::i18n::chinese_font_available() {
-            return Err("no Chinese font is installed on this system (for example Noto Sans CJK SC or Microsoft YaHei); the interface stays in English".into());
-        }
-        // Korean needs an installed Hangul font (none is bundled; see cjk.rs)
-        if id == "app.language.korean" && !crate::i18n::korean_font_available() {
-            return Err("no Korean font is installed on this system (for example Malgun Gothic or Noto Sans CJK KR); the interface stays in English".into());
-        }
-        let language = match id {
-            "app.language.japanese" => crate::i18n::Language::Ja,
-            "app.language.spanish" => crate::i18n::Language::Es,
-            "app.language.portuguese" => crate::i18n::Language::PtBr,
-            "app.language.ukrainian" => crate::i18n::Language::Uk,
-            "app.language.chinese" => crate::i18n::Language::ZhCn,
-            "app.language.german" => crate::i18n::Language::De,
-            "app.language.russian" => crate::i18n::Language::Ru,
-            "app.language.french" => crate::i18n::Language::Fr,
-            "app.language.indonesian" => crate::i18n::Language::Id,
-            "app.language.italian" => crate::i18n::Language::It,
-            "app.language.bosnian" => crate::i18n::Language::Bs,
-            "app.language.korean" => crate::i18n::Language::Ko,
-            "app.language.czech" => crate::i18n::Language::Cs,
-            "app.language.polish" => crate::i18n::Language::Pl,
-            "app.language.swedish" => crate::i18n::Language::Sv,
-            "app.language.turkish" => crate::i18n::Language::Tr,
-            _ => crate::i18n::Language::En,
-        };
+    if matches!(id, "app.language.english" | "app.language.russian") {
+        let language = if id == "app.language.russian" { crate::i18n::Language::Ru } else { crate::i18n::Language::En };
         // The preference is updated in memory before it is written, so a failed write (read-only
         // or full disk) still switches the interface; it only can't be remembered for next time.
         let saved = app.session.execute("prefs.set", json!({"key": "general.interfaceLanguage", "value": language.code()}));
@@ -928,22 +864,7 @@ pub fn menu_items(app: &FilmcraftApp) -> Vec<MenuItem> {
         it.label = app.ui.language.tr(&it.label).to_string();
         match it.id.as_str() {
             "app.language.english" => it.checked = Some(app.ui.language == crate::i18n::Language::En),
-            "app.language.japanese" => it.checked = Some(app.ui.language == crate::i18n::Language::Ja),
-            "app.language.spanish" => it.checked = Some(app.ui.language == crate::i18n::Language::Es),
-            "app.language.portuguese" => it.checked = Some(app.ui.language == crate::i18n::Language::PtBr),
-            "app.language.ukrainian" => it.checked = Some(app.ui.language == crate::i18n::Language::Uk),
-            "app.language.chinese" => it.checked = Some(app.ui.language == crate::i18n::Language::ZhCn),
-            "app.language.german" => it.checked = Some(app.ui.language == crate::i18n::Language::De),
             "app.language.russian" => it.checked = Some(app.ui.language == crate::i18n::Language::Ru),
-            "app.language.french" => it.checked = Some(app.ui.language == crate::i18n::Language::Fr),
-            "app.language.indonesian" => it.checked = Some(app.ui.language == crate::i18n::Language::Id),
-            "app.language.italian" => it.checked = Some(app.ui.language == crate::i18n::Language::It),
-            "app.language.bosnian" => it.checked = Some(app.ui.language == crate::i18n::Language::Bs),
-            "app.language.korean" => it.checked = Some(app.ui.language == crate::i18n::Language::Ko),
-            "app.language.czech" => it.checked = Some(app.ui.language == crate::i18n::Language::Cs),
-            "app.language.polish" => it.checked = Some(app.ui.language == crate::i18n::Language::Pl),
-            "app.language.swedish" => it.checked = Some(app.ui.language == crate::i18n::Language::Sv),
-            "app.language.turkish" => it.checked = Some(app.ui.language == crate::i18n::Language::Tr),
             _ => {}
         }
         if let Some(on) = engine_toggle(&app.session, &it.id) {
