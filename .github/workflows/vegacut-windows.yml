@@ -24,7 +24,7 @@ jobs:
         python - <<'PYTHON'
         import base64
         from pathlib import Path
-        for name in ['vegacut-v030.png', 'vegacut-v030-ru.png']:
+        for name in ['vegacut-v020.png', 'vegacut-v020-ru.png']:
             data = Path('/tmp/vegacut-screens', name).read_bytes()
             print('VEGACUT_SCREENSHOT ' + name + ' ' + base64.b64encode(data).decode())
         PYTHON
