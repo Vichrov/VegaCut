@@ -207,3 +207,42 @@ fn toggling_a_partly_selected_group_flips_it_as_a_whole() {
     s.execute("timeline.select", json!({"clips": [v0.0], "toggle": true})).unwrap();
     assert!(s.state.selection.is_empty(), "the whole group is deselected: {:?}", s.state.selection);
 }
+
+#[test]
+fn detach_audio_video_is_one_undo_and_survives_project_serialization() {
+    let (mut s, [(video, sound), other]) = paired_sequence();
+    s.execute("timeline.select", json!({"clips": [video.0]})).unwrap();
+    s.execute("clip.group", json!({})).unwrap();
+    let before = s.project.clone();
+    s.execute("clip.detach", json!({})).unwrap();
+    for id in [video, sound] {
+        let item = s.active_sequence().unwrap().find_item(id).unwrap().1;
+        assert_eq!((item.group, item.link), (None, None));
+    }
+    assert!(s.active_sequence().unwrap().find_item(other.0).unwrap().1.link.is_some());
+    let encoded = serde_json::to_vec(&*s.project).unwrap();
+    let decoded: filmcraft_project::Project = serde_json::from_slice(&encoded).unwrap();
+    assert_eq!(*s.project, decoded);
+    s.execute("timeline.select", json!({"clips": [sound.0]})).unwrap();
+    assert_eq!(s.state.selection, vec![sound]);
+    s.execute("edit.undo", json!({})).unwrap();
+    assert_eq!(*s.project, *before);
+    // Alt-selecting only one half still removes the now-orphaned A/V link.
+    s.execute("timeline.select", json!({"clips": [sound.0], "linked": false})).unwrap();
+    s.execute("clip.detach", json!({})).unwrap();
+    assert!(s.active_sequence().unwrap().find_item(video).unwrap().1.link.is_none());
+}
+
+#[test]
+fn slip_preview_matches_commit_and_leaves_project_untouched() {
+    for delta in [Tick(254_016_000_000 / 2), Tick(i64::MIN), Tick(i64::MAX)] {
+        let (mut s, [(video, sound), _]) = paired_sequence();
+        let before = s.project.clone();
+        let preview = crate::commands::preview_slip(&s, video, delta).unwrap();
+        assert_eq!(*s.project, *before);
+        s.execute("timeline.slip", json!({"clip": video.0, "delta": delta.0})).unwrap();
+        for id in [video, sound] {
+            assert_eq!(preview.iter().find(|i| i.id == id).unwrap(), s.active_sequence().unwrap().find_item(id).unwrap().1);
+        }
+    }
+}

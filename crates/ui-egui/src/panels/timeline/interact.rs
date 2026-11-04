@@ -76,6 +76,13 @@ pub(super) fn preview_drag(
                 }
             }
         }
+        Drag::Slip { clip, delta } => {
+            if let Ok(items) = filmcraft_engine::commands::preview_slip(&app.session, *clip, *delta) {
+                for item in items {
+                    edited.insert(item.id, item);
+                }
+            }
+        }
         Drag::Slide { clip, delta } => {
             if let Some((_, it)) = seq.find_item(*clip) {
                 out.insert(*clip, (it.start + *delta, it.duration, None));
@@ -396,6 +403,18 @@ fn press_action(app: &mut FilmcraftApp, ctx: &egui::Context, resp: &egui::Respon
             Grab::Volume { .. } if resp.clicked() && !adding => Grab::Other(pressed.grab.hit()),
             g => g,
         };
+        // A click seeks anywhere on the edit surface, but a clip drag never relocates the cursor.
+        if app.session.shortcuts.vegacut_mouse
+            && tool == Tool::Selection
+            && resp.clicked()
+            && !mods.any()
+            && layout.content.contains(p)
+            && matches!(grab, Grab::Other(Hit::Clip { .. } | Hit::Empty { .. } | Hit::None))
+        {
+            app.stop_source();
+            app.stop_for_scrub();
+            let _ = app.session.execute("playhead.set", json!({"time": app.session.sequence_rate().snap_nearest(t.max(Tick::ZERO)).0}));
+        }
         start_drag(app, ctx, resp, seq, layout, grab, p, t, (pressed.v_scroll, pressed.a_scroll));
     }
 
@@ -524,7 +543,7 @@ fn start_drag(
             let sel = &app.session.state.selection;
             if mods.shift || (app.session.shortcuts.vegacut_mouse && mods.command && resp.clicked()) {
                 let _ = app.session.execute("timeline.select", json!({"clips": [clip.0], "toggle": true, "linked": !mods.alt}));
-            } else if !sel.contains(&clip) || (mods.alt && resp.clicked()) {
+            } else if !sel.contains(&clip) || (resp.clicked() && (mods.alt || app.session.shortcuts.vegacut_mouse)) {
                 // Alt-click isolates one side; Alt-drag keeps the selected group to copy.
                 let _ = app.session.execute("timeline.select", json!({"clips": [clip.0], "linked": !mods.alt}));
             }
@@ -1395,6 +1414,7 @@ pub(super) fn interact(app: &mut FilmcraftApp, ui: &mut egui::Ui, seq: &Sequence
                         multicam_menu(app, ui, &picked);
                         continue;
                     }
+                    let cmd = if cmd == "clip.ungroup" && app.session.shortcuts.vegacut_mouse { "clip.detach" } else { cmd };
                     let label = match cmd {
                         "clip.enable" if all_enabled => tl!("✓ Enable"),
                         "clip.link" if linked => tl!("Unlink"),

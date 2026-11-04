@@ -1831,7 +1831,7 @@ dependencies = [
 
 [[package]]
 name = "filmcraft"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "arboard",
  "chrono",
@@ -1960,7 +1960,7 @@ version = "0.17.0"
 
 [[package]]
 name = "filmcraft-cli"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "filmcraft-automation",
  "filmcraft-codecs",
@@ -2487,7 +2487,7 @@ dependencies = [
 
 [[package]]
 name = "filmcraft-ui-egui"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "cpu-time",
  "craft-ui",

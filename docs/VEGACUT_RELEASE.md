@@ -1,11 +1,17 @@
-# VegaCut v0.3.0
+# VegaCut v0.4.0
 
-Core Vegas-style editing controls: S split, G/U grouping, F8 snapping, Q loop, frame stepping and timeline zoom. Wheel zooms around the pointer; Ctrl+wheel scrolls tracks and Shift+wheel scrolls time. Ctrl-drag duplicates clips without ripple insertion, with one Undo.
+Fixes three timeline problems reported after v0.3:
 
-Новый профиль управления VegaCut: S — разрезание, G/U — группировка, F8 — привязка, Q — цикл. Колесо — масштаб; Ctrl+колесо — дорожки; Shift+колесо — время; Ctrl+перетаскивание — копирование.
+- **U** now detaches audio from video as well as removing the ordinary group. **G** groups the selected events again. Undo restores the relationship.
+- A plain click on a clip body or empty track time places the edit cursor there; dragging its handle is no longer necessary.
+- Red **A/V offset** badges show signed frame displacement, including live move/trim/slip previews. Restoring synchronization clears the badge. Different speeds get a separate warning.
 
-New installations use the profile automatically. Existing profiles are preserved: select **VegaCut** in **Edit → Keyboard Shortcuts** after upgrading. See `docs/VEGACUT_CONTROLS.md` for the exact subset and limitations.
+Исправлены отделение звука клавишей **U**, установка курсора обычным щелчком и метки рассинхронизации аудио/видео. **G** снова группирует выделенные клипы.
 
-Extract the Windows x64 portable ZIP into a writable folder and launch `VegaCut.exe`. Preferences, autosaves and recovery live in the adjacent `data` folder. Preserve that folder when upgrading. CLI: `VegaCut-cli.exe`; project format: `.fcproj`. English/Russian interface only.
+Select the built-in **VegaCut** keyboard profile to use these controls. Existing modified custom profiles are preserved; reselect VegaCut to adopt the corrected U assignment.
 
-The release is published only after Linux validation and Windows tests/build/packaging. Manual Windows GUI testing remains unverified. This is an early-development release, not full Vegas parity; no `.veg`, VST3 or OpenFX compatibility. Automatic overlap crossfades remain v0.4 work. Download updates manually.
+Extract the Windows x64 portable ZIP into a writable folder and run `VegaCut.exe`. Preserve the adjacent `data` folder when upgrading. Interface: English/Russian. Projects remain `.fcproj`.
+
+This release prioritizes the reported editing problems; automatic overlap crossfades and new ripple modes are deferred. Sync badges compare opposite media types from the same source, not independent recordings; frame holds and animated retiming have no numeric offset badge. No `.veg`, VST3 or OpenFX compatibility is promised. Manual Windows GUI testing is still unverified.
+
+Publication requires the complete Linux validation gate and Windows tests/build/package. See `docs/VEGACUT_CONTROLS.md` and `docs/VEGACUT_VALIDATION.md` for scope and checks.

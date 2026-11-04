@@ -457,7 +457,7 @@ pub const AVID: &[Entry] = &[
 pub const VEGACUT: &[Entry] = &[
     ("sequence.addEdit", "S", ""),
     ("clip.group", "G", ""),
-    ("clip.ungroup", "U", ""),
+    ("clip.detach", "U", ""),
     ("sequence.snap", "F8", ""),
     ("playback.loop", "Q", ""),
     ("playhead.start", "Cmd+Home", ""),

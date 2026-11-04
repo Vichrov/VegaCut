@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- Fix VegaCut U: remove both event grouping and the audio/video link in one undoable command; G can regroup selected events. The old U mapping only removed ordinary groups.
+- Plain clicks on clip bodies or empty timeline space now seek to the clicked frame in the VegaCut profile. Drags and modified selection clicks retain their editing behavior.
+- Add red A/V synchronization badges with signed frame offsets, including live move/trim/slip previews and unlinked overlapping clips from the same source.
+- A separate speed-mismatch badge avoids presenting unequal playback speeds as one constant offset. Holds and animated time remapping are excluded from numeric sync calculations.
+- Add engine and pointer/keyboard regressions plus English/Russian rendered checks.
+
 ## 0.3.0
 
 - Add the VegaCut keyboard/mouse profile: S split, G/U group/ungroup, F8 snapping, Q loop, Alt+arrows frame stepping and Up/Down timeline zoom.

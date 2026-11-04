@@ -400,7 +400,7 @@ fn vegacut_profile_survives_custom_export_undo_and_restart() {
     s.use_vegacut_if_unconfigured();
     assert_eq!(s.preset, VEGACUT_PRESET);
     assert!(s.vegacut_mouse);
-    for (command, key) in [("sequence.addEdit", "S"), ("clip.group", "G"), ("clip.ungroup", "U"), ("sequence.snap", "F8")] {
+    for (command, key) in [("sequence.addEdit", "S"), ("clip.group", "G"), ("clip.detach", "U"), ("sequence.snap", "F8")] {
         assert_eq!(s.primary(command).as_deref(), Some(key));
     }
     s.save_preset("My VegaCut").unwrap();

@@ -803,6 +803,19 @@ pub fn trim_delta(s: &Session, clip: ClipId, edge: Edge, mode: TrimMode, delta: 
     trim_delta_linked(s, clip, edge, mode, delta, true)
 }
 
+/// Preview exactly the same clamped source change as timeline.slip, without touching history.
+pub fn preview_slip(s: &Session, clip: ClipId, delta: Tick) -> Result<Vec<filmcraft_project::TrackItem>> {
+    let mut q = s.active_sequence().ok_or(EngineError::NoSequence)?.clone();
+    let durations = |id: ItemId| crate::media_duration(&s.project, &s.media, id);
+    let starts = |id: ItemId| crate::media_start(&s.project, id);
+    let mut next = s.project.next_id;
+    let mut ctx = edit::EditCtx { next_id: &mut next, media_duration: &durations, media_start: &starts, min_duration: q.settings.frame_rate.frame_duration() };
+    let clips = with_links(s, &[clip]);
+    let deltas: Vec<_> = clips.iter().map(|c| (*c, delta)).collect();
+    slip_together(&mut q, &mut ctx, &deltas)?;
+    Ok(clips.iter().filter_map(|c| q.find_item(*c).map(|(_, i)| i.clone())).collect())
+}
+
 /// [`trim_delta`] for a trim that, with `linked` false (Alt held), leaves the clip's linked
 /// partners alone (#3300).
 pub fn trim_delta_linked(s: &Session, clip: ClipId, edge: Edge, mode: TrimMode, delta: Tick, linked: bool) -> Result<Tick> {
@@ -2447,6 +2460,28 @@ fn build() -> Vec<CommandSpec> {
                 for c in &sel {
                     if let Some((_, i)) = q.find_item_mut(*c) {
                         i.group = None;
+                    }
+                }
+                Ok(())
+            })?;
+            Ok(Value::Null)
+        }),
+        cmd!("clip.detach", "Ungroup Audio and Video", ["Clip"], None, "{}", has_selection, |s, _| {
+            let sel = s.state.selection.clone();
+            s.edit_sequence("Ungroup Audio and Video", |q, _, _| {
+                let mut links = std::collections::HashSet::new();
+                for c in &sel {
+                    if let Some((_, i)) = q.find_item_mut(*c) {
+                        i.group = None;
+                        links.extend(i.link.take());
+                    }
+                }
+                for link in links {
+                    let members: Vec<_> = q.all_tracks().flat_map(|t| &t.items).filter(|i| i.link == Some(link)).map(|i| i.id).collect();
+                    if let [lonely] = members.as_slice()
+                        && let Some((_, i)) = q.find_item_mut(*lonely)
+                    {
+                        i.link = None;
                     }
                 }
                 Ok(())

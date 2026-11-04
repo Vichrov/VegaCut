@@ -23,7 +23,11 @@ impl Driver {
         let (tx, rx) = channel();
         let mut app = FilmcraftApp::new(s).with_control(rx);
         app.hooks.open_path = Some(Box::new(|_, _| Ok(())));
-        let harness = Harness::builder().with_size(egui::vec2(1600.0, 980.0)).with_max_steps(10_000).build_eframe(move |_cc| app);
+        let mut builder = Harness::builder().with_size(egui::vec2(1600.0, 980.0)).with_max_steps(10_000);
+        if std::env::var_os("FILMCRAFT_UI_SNAPSHOT_DIR").is_some() {
+            builder = builder.wgpu();
+        }
+        let harness = builder.build_eframe(move |_cc| app);
         let mut d = Driver { harness, tx };
         d.frames(4);
         d
@@ -505,4 +509,73 @@ fn vegacut_keys_split_group_and_undo() {
     d.key("Q");
     assert_eq!(*d.app().session.project, *project, "editing keys never modify the project while typing");
     assert_ne!(d.app().playback.looping, looping, "typing Q does not toggle loop playback");
+}
+
+#[test]
+fn vegacut_av_detach_seek_and_sync_markers() {
+    use filmcraft_time::Tick;
+    let mut d = Driver::new();
+    d.exec("shortcuts.loadPreset", json!({"name": "VegaCut"}));
+    d.ok("ui.menu.invoke", json!({"id": "window.workspace.vegacut"}));
+    d.exec("file.newSequence", json!({"name": "A/V sync", "fps": 24}));
+    let media = d.app().session.project.items.values().find(|i| i.has_video() && i.has_audio() && i.as_media().is_some()).unwrap().id;
+    let rate = d.app().session.sequence_rate();
+    d.exec("timeline.place", json!({"item": media.0, "time": 0, "duration": rate.tick_of(96).0}));
+    d.ok("ui.set", json!({"timeline": {"pps": 100.0, "scroll": 0.0}}));
+    d.frames(4);
+    let original = d.app().session.active_sequence().unwrap().clone();
+    let (video, audio) = (original.video_tracks[0].items[0].id, original.audio_tracks[0].items[0].id);
+    let click = |d: &mut Driver, id: filmcraft_project::ClipId| {
+        d.ok("ui.click", json!({"id": format!("timeline.clip.{}", id.0), "fx": 0.4, "fy": 0.25}));
+        d.frames(2);
+    };
+    click(&mut d, video);
+    assert!(d.app().session.playhead() > Tick::ZERO, "clip body click seeks");
+    assert_eq!(d.app().session.state.selection.len(), 2);
+    d.key("U");
+    assert!(d.app().session.active_sequence().unwrap().all_tracks().flat_map(|t| &t.items).all(|i| i.link.is_none() && i.group.is_none()));
+    d.key("Cmd+Z");
+    assert_eq!(*d.app().session.active_sequence().unwrap(), original);
+    d.key("U");
+    click(&mut d, audio);
+    assert_eq!(d.app().session.state.selection, vec![audio], "plain click selects only the detached side");
+    d.exec("sequence.snap", json!({"on": false}));
+    let elements = d.ok("ui.elements", json!({"prefix": format!("timeline.clip.{}", audio.0)}));
+    let e = elements.as_array().unwrap().iter().find(|e| e["id"] == format!("timeline.clip.{}", audio.0)).unwrap();
+    let r = e["rect"].as_array().unwrap();
+    let x = r[0].as_f64().unwrap() + r[2].as_f64().unwrap() * 0.4;
+    let y = r[1].as_f64().unwrap() + r[3].as_f64().unwrap() * 0.25;
+    let playhead = d.app().session.playhead();
+    d.ok("ui.drag", json!({"from": {"x": x, "y": y}, "to": {"x": x + 50.0, "y": y}, "steps": 8}));
+    d.frames(3);
+    let q = d.app().session.active_sequence().unwrap();
+    assert_eq!(q.find_item(video).unwrap().1.start, Tick::ZERO);
+    assert!(q.find_item(audio).unwrap().1.start > Tick::ZERO);
+    assert_eq!(d.app().session.playhead(), playhead, "drag is not a click seek");
+    for id in [audio, video] {
+        assert!(d.app().auto.elements.iter().any(|e| e.id == format!("timeline.clip.{}.syncOffset", id.0)), "visible A/V offset badge");
+    }
+    if let Some(dir) = std::env::var_os("FILMCRAFT_UI_SNAPSHOT_DIR") {
+        let dir = std::path::PathBuf::from(dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        d.harness.render().unwrap().save(dir.join("vegacut-sync-en.png")).unwrap();
+        d.ok("ui.menu.invoke", json!({"id": "app.language.russian"}));
+        d.frames(4);
+        d.harness.render().unwrap().save(dir.join("vegacut-sync-ru.png")).unwrap();
+    }
+    d.key("Cmd+Z");
+    assert_eq!(d.app().session.active_sequence().unwrap().find_item(audio).unwrap().1.start, Tick::ZERO);
+    assert!(!d.app().auto.elements.iter().any(|e| e.id.ends_with(".syncOffset")), "undo clears the offset");
+    // A plain click on empty track time seeks without any edit or drag.
+    let before = d.app().session.project.clone();
+    d.ok("ui.click", json!({"x": x + 500.0, "y": y}));
+    d.frames(2);
+    assert!(d.app().session.playhead() > playhead);
+    assert_eq!(*d.app().session.project, *before);
+    // Grouping again makes a click select both detached halves.
+    d.exec("timeline.select", json!({"clips": [video.0, audio.0]}));
+    d.focus("Timeline");
+    d.key("G");
+    click(&mut d, video);
+    assert_eq!(d.app().session.state.selection.len(), 2);
 }

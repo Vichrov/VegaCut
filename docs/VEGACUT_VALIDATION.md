@@ -36,3 +36,9 @@ This closes the scoped 0.1/0.2 roadmap prerequisites, not full Vegas parity. A m
 The candidate branch is `vegacut-v030`. The release workflow must pass the full Linux gate and Windows tests/build/package before fast-forwarding main and publishing v0.3.0. A candidate commit is not evidence of a successful release; inspect its linked Actions run.
 
 Added regressions cover actual key-driven split/group/ungroup/Undo, snapping and loop toggles, text-field protection, modifier wheel navigation, Ctrl-drag copy preview/commit/Undo, and profile persistence/import/export/Cancel/undo/redo. Existing workspace persistence and EN/RU rendering checks run again. No local whole-workspace rebuild is claimed for this change.
+
+## v0.3 completion and v0.4 candidate
+
+The v0.3 feature tests all passed: 4688 passed, 52 upstream skipped. Its first release attempt then failed in the screenshot-reading script (v030 filenames instead of the v020 filenames actually produced by the workspace test). Commit `fed0be7d0a8fc879d6173c6f1ec06c209af4e6fe` fixed those paths; the v0.3 ZIP and checksum were subsequently published.
+
+The v0.4 candidate is `vegacut-v040`. New regressions cover A/V detachment and project serialization, one-step Undo, source-slip preview equivalence including extreme input deltas, aligned trims, detached overlap matching, live move/source changes, unequal and invalid speeds, real U/G/Undo keys, click seeking, independent audio dragging and visible offset badges. The release gate renders `vegacut-sync-en.png` and `vegacut-sync-ru.png` from that actual interaction test, in addition to the existing workspace checks. Candidate source is not proof of a successful release; the linked GitHub Actions result remains authoritative.

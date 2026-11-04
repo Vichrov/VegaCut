@@ -3724,3 +3724,6 @@
 	“{file}” already exists in “{folder}”. Do you want to replace it?	«{file}» уже существует в «{folder}». Заменить его?
 	VegaCut	VegaCut
 track header	Pan	Панорама
+	Ungroup Audio and Video	Отделить звук от видео
+	A/V offset	Смещение А/В
+	A/V speed mismatch	Разная скорость А/В

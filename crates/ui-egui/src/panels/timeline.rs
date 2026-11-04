@@ -34,6 +34,7 @@ mod menus;
 mod ruler;
 mod scrollbars;
 mod snap;
+mod sync_marks;
 mod waveforms;
 
 #[cfg(test)]
@@ -610,6 +611,7 @@ fn draw_clips(
     if copying {
         ctx.set_cursor_icon(CursorIcon::Copy);
     }
+    let sync_offsets = sync_marks::offsets(seq, &previews, &edited, app.session.shortcuts.vegacut_mouse || app.session.prefs.timeline.out_of_sync_unlinked);
     let duplicates = if app.session.state.show_duplicate_frame_markers { duplicate_markers(app, ctx, seq_id, seq) } else { Arc::default() };
     for r in rows {
         let Some(tr) = seq.track(r.track) else { continue };
@@ -646,6 +648,7 @@ fn draw_clips(
             if volume_line {
                 super::timeline_volume::paint(&p, body, it);
             }
+            sync_marks::paint(app, &p, body, it.id, sync_offsets.get(&it.id));
             // Show Duplicate Frame Markers: a stripe along the bottom under each repeated frame,
             // in the color of the clip's master clip
             if let Some(d) = duplicates.get(&it.id) {
@@ -678,6 +681,7 @@ fn draw_clips(
                 if volume_line {
                     super::timeline_volume::paint(&p, body, it);
                 }
+                sync_marks::paint(app, &p, body, it.id, sync_offsets.get(&it.id));
                 app.auto.add(&format!("timeline.clip.{}", it.id.0), body.intersect(content), &it.name);
             }
         }
