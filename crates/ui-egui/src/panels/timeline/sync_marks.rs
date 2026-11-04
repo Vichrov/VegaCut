@@ -1,5 +1,5 @@
 //! A/V source alignment, including live move/trim previews. No edit or project mutation.
-use super::*;
+use super::{ClipId, Color32, FilmcraftApp, HashMap, ItemId, Rect, Sequence, Stroke, StrokeKind, Tick, Tokens, TrackId, TrackItem, TrackKind, pos2, vec2};
 
 struct Event<'a> {
     item: &'a TrackItem,
@@ -112,8 +112,9 @@ pub(super) fn paint(app: &mut FilmcraftApp, painter: &egui::Painter, body: Rect,
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{ClipId, HashMap, Offset, Sequence, offsets};
     use filmcraft_engine::Session;
+    use serde_json::json;
 
     fn pair() -> (Sequence, ClipId, ClipId) {
         let mut s = Session::default();
